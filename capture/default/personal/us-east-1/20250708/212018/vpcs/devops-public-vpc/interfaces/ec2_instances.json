@@ -1,0 +1,90 @@
+[
+  {
+    "Association": {
+      "AllocationId": "eipalloc-035ebc52f1c086eb0",
+      "AssociationId": "eipassoc-0108ee03e3946262f",
+      "IpOwnerId": "***",
+      "PublicDnsName": "ec2-3-213-170-119.compute-1.amazonaws.com",
+      "PublicIp": "3.213.170.119"
+    },
+    "Attachment": {
+      "AttachTime": "2025-07-09T04:14:13+00:00",
+      "AttachmentId": "eni-attach-0661d7160c981be30",
+      "DeleteOnTermination": false,
+      "DeviceIndex": 0,
+      "NetworkCardIndex": 0,
+      "InstanceId": "i-0e64cbd9718ff9743",
+      "InstanceOwnerId": "***",
+      "Status": "attached"
+    },
+    "AvailabilityZone": "us-east-1a",
+    "Description": "Bastion ENI for Public Subnet",
+    "Groups": [
+      {
+        "GroupId": "sg-0b554ea1beb59c034",
+        "GroupName": "network-mapping-BastionRemoteAccessSG-diMC6pIwW4kG"
+      },
+      {
+        "GroupId": "sg-0a5369bfe8178b904",
+        "GroupName": "network-mapping-EC2InstanceSecurityGroup-zHu59SlBh4tM"
+      }
+    ],
+    "InterfaceType": "interface",
+    "Ipv6Addresses": [],
+    "MacAddress": "02:b6:5d:fb:f5:e9",
+    "NetworkInterfaceId": "eni-03fd376cea628ecb2",
+    "OwnerId": "***",
+    "PrivateDnsName": "ip-10-0-1-18.ec2.internal",
+    "PublicDnsName": "ec2-3-213-170-119.compute-1.amazonaws.com",
+    "PublicIpDnsNameOptions": {
+      "DnsHostnameType": "public-ipv4-dns-name",
+      "PublicIpv4DnsName": "ec2-3-213-170-119.compute-1.amazonaws.com"
+    },
+    "PrivateIpAddress": "10.0.1.18",
+    "PrivateIpAddresses": [
+      {
+        "Association": {
+          "AllocationId": "eipalloc-035ebc52f1c086eb0",
+          "AssociationId": "eipassoc-0108ee03e3946262f",
+          "IpOwnerId": "***",
+          "PublicDnsName": "ec2-3-213-170-119.compute-1.amazonaws.com",
+          "PublicIp": "3.213.170.119"
+        },
+        "Primary": true,
+        "PrivateDnsName": "ip-10-0-1-18.ec2.internal",
+        "PrivateIpAddress": "10.0.1.18"
+      }
+    ],
+    "RequesterId": "043234062703",
+    "RequesterManaged": false,
+    "SourceDestCheck": true,
+    "Status": "in-use",
+    "SubnetId": "subnet-03ea1805ea65cba01",
+    "TagSet": [
+      {
+        "Key": "aws:cloudformation:logical-id",
+        "Value": "BastionENI"
+      },
+      {
+        "Key": "Name",
+        "Value": "DevOps-BastionENI"
+      },
+      {
+        "Key": "aws:cloudformation:stack-id",
+        "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+      },
+      {
+        "Key": "aws:cloudformation:stack-name",
+        "Value": "network-mapping"
+      },
+      {
+        "Key": "DevOps",
+        "Value": "true"
+      }
+    ],
+    "VpcId": "vpc-028b2dc2728406fd9",
+    "Operator": {
+      "Managed": false
+    }
+  }
+]

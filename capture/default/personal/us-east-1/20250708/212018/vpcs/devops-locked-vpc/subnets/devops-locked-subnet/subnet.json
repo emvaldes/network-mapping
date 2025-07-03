@@ -1,0 +1,48 @@
+{
+  "AvailabilityZoneId": "use1-az1",
+  "MapCustomerOwnedIpOnLaunch": false,
+  "OwnerId": "***",
+  "AssignIpv6AddressOnCreation": false,
+  "Ipv6CidrBlockAssociationSet": [],
+  "Tags": [
+    {
+      "Key": "aws:cloudformation:logical-id",
+      "Value": "DevOpsSubnet"
+    },
+    {
+      "Key": "DevOps",
+      "Value": "true"
+    },
+    {
+      "Key": "aws:cloudformation:stack-id",
+      "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+    },
+    {
+      "Key": "aws:cloudformation:stack-name",
+      "Value": "network-mapping"
+    },
+    {
+      "Key": "Name",
+      "Value": "devops-locked-subnet"
+    }
+  ],
+  "SubnetArn": "arn:aws:ec2:us-east-1:***:subnet/subnet-0a7863c4791ae49f2",
+  "EnableDns64": false,
+  "Ipv6Native": false,
+  "PrivateDnsNameOptionsOnLaunch": {
+    "HostnameType": "ip-name",
+    "EnableResourceNameDnsARecord": false,
+    "EnableResourceNameDnsAAAARecord": false
+  },
+  "BlockPublicAccessStates": {
+    "InternetGatewayBlockMode": "off"
+  },
+  "SubnetId": "subnet-0a7863c4791ae49f2",
+  "State": "available",
+  "VpcId": "vpc-0f7fa8fdff02da590",
+  "CidrBlock": "10.2.1.0/24",
+  "AvailableIpAddressCount": 237,
+  "AvailabilityZone": "us-east-1a",
+  "DefaultForAz": false,
+  "MapPublicIpOnLaunch": false
+}

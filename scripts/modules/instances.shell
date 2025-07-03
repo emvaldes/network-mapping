@@ -1,0 +1,231 @@
+#!/usr/bin/env bash
+
+#------------------------------------------------------------------------------
+# vpc_ec2_instances
+#
+# Queries all EC2 instances in a given VPC and saves selected instance metadata
+# to a JSON file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+#
+# Output File:
+#   - ec2_instances.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function vpc_ec2_instances () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-instances \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=vpc-id,Values=${vpc_id}" \
+        --query 'Reservations[].Instances[].{
+                  InstanceId: InstanceId,
+                  State: State.Name,
+                  SubnetId: SubnetId,
+                  VpcId: VpcId,
+                  PrivateIpAddress: PrivateIpAddress,
+                  PublicIpAddress: PublicIpAddress,
+                  IamRole: IamInstanceProfile.Arn,
+                  Tags: Tags
+                }' \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-ec2-instances='vpc_ec2_instances';
+
+#------------------------------------------------------------------------------
+# subnet_ec2_instances
+#
+# Queries all EC2 instances in a given subnet and saves selected instance metadata
+# to a JSON file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: Subnet ID
+#
+# Output File:
+#   - ec2_instances.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function subnet_ec2_instances () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local subnet_id="${2}" || return 1;
+
+    aws ec2 describe-instances \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=subnet-id,Values=${subnet_id}" \
+        --query 'Reservations[].Instances[].{
+                  InstanceId: InstanceId,
+                  State: State.Name,
+                  SubnetId: SubnetId,
+                  VpcId: VpcId,
+                  PrivateIp: PrivateIpAddress,
+                  PublicIp: PublicIpAddress,
+                  IamRole: IamInstanceProfile.Arn,
+                  Tags: Tags
+                }' \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias subnet-ec2-instances='subnet_ec2_instances';
+
+#------------------------------------------------------------------------------
+# ssm_managed_instances
+#
+# Queries all SSM-managed EC2 instances and saves the instance information.
+# Optionally displays a table output of managed instances.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: Show table output ("true" to display a table, anything else to skip)
+#
+# Output File:
+#   - managed_instances.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function ssm_managed_instances () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local show_table="${2}" || return 1;
+
+    if [[ ! -f "${output_file}" ]]; then
+      aws ssm describe-instance-information \
+          --profile "${target_profile}" \
+          --region "${target_region}" \
+          --output "${output_format}" \
+      > "${output_file}";
+    fi;
+
+    if [[ "${show_table}" == "true" ]]; then
+        aws ssm describe-instance-information \
+            --profile "${target_profile}" \
+            --region "${target_region}" \
+            --output table || return 1;
+    fi;
+
+    return 0;
+}; alias ssm-managed-instances='ssm_managed_instances';
+
+#------------------------------------------------------------------------------
+# ssm_subnet_instances
+#
+# Queries EC2 instances in a given subnet and enriches their metadata with
+# SSM status from the cached managed_instances.json file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: Subnet ID
+#
+# Output File:
+#   - ec2_instances_ssm.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function ssm_subnet_instances () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local subnet_id="${2}" || return 1;
+
+    ## Query EC2 for all instances in the subnet
+    local ec2_data=$(
+      aws ec2 describe-instances \
+          --profile "${target_profile}" \
+          --region "${target_region}" \
+          --filters "Name=subnet-id,Values=${subnet_id}" \
+          --query 'Reservations[].Instances[].{
+                    InstanceId: InstanceId,
+                    State: State.Name,
+                    SubnetId: SubnetId,
+                    VpcId: VpcId,
+                    PrivateIpAddress: PrivateIpAddress,
+                    PublicIpAddress: PublicIpAddress,
+                    IamRole: IamInstanceProfile.Arn,
+                    Tags: Tags
+                  }' \
+          --output json
+      );
+
+    ## Merge SSM data from the global cache
+    jq --slurpfile ssm "${shared_directory}/managed_instances.json" \
+      'map(
+        . as $ec2 |
+        . + {
+          SSM: (
+            $ssm[0].InstanceInformationList[]
+            | select( .InstanceId == $ec2.InstanceId )
+          )
+        }
+      )' <<< "${ec2_data}" \
+    > "${output_file}";
+
+    return 0;
+}; alias ssm-subnet-instances='ssm_subnet_instances';
+
+#------------------------------------------------------------------------------
+# ssm_inspect_instances
+#
+# Runs specified shell commands on all SSM-managed EC2 instances in a given subnet
+# where SSM PingStatus is "Online".
+#
+# Parameters:
+#   - 1: Input EC2+SSM instances JSON file
+#   - 2: Subnet directory path for saving command output
+#   - 3+: Shell commands to execute (as arguments)
+#
+# Output:
+#   - Creates one file per instance containing the command output.
+#------------------------------------------------------------------------------
+
+function ssm_inspect_instances () {
+
+    [[ -n ${1:-} ]] && local input_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local subnet_directory="${2}" || return 1;
+    shift 2;
+    [[ $# -ge 1 ]] && local commands=( "$@" ) || return 1;
+
+    local instance_id command_id output_file;
+
+    ## Find instances in the JSON file where SSM exists and PingStatus is Online
+    jq -r '.[] | select(.SSM != null and .SSM.PingStatus == "Online") | .InstanceId' "${input_file}" | while read -r instance_id; do
+
+        echo -e "[SSM] Inspecting instance: ${instance_id}";
+
+        ## Send command to the instance
+        command_id=$(aws ssm send-command \
+                         --region "${target_region}" \
+                         --profile "${target_profile}" \
+                         --instance-ids "${instance_id}" \
+                         --document-name "AWS-RunShellScript" \
+                         --comment "Network Mapping Inspection" \
+                         --parameters commands="$(printf "[%s]" "$(IFS=,; echo "${commands[*]}")")" \
+                         --query 'Command.CommandId' \
+                         --output text);
+
+        echo -e "[SSM] Command ID for ${instance_id}: ${command_id}";
+        sleep 5;
+
+        ## Retrieve the output and save it to the subnet directory
+        output_file="${subnet_directory}/ssm_output_${instance_id}.txt";
+
+        aws ssm get-command-invocation \
+            --region "${target_region}" \
+            --profile "${target_profile}" \
+            --command-id "${command_id}" \
+            --instance-id "${instance_id}" \
+            --query 'StandardOutputContent' \
+            --output text > "${output_file}" || true;
+
+        echo -e "[SSM] Output for ${instance_id} saved to ${output_file}";
+
+    done;
+
+    return 0;
+}; alias ssm-inspect-instances='ssm_inspect_instances';

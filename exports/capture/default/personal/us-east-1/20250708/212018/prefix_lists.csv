@@ -1,0 +1,12 @@
+PrefixListId,PrefixListName,AddressFamily,State,PrefixListArn,OwnerId
+"pl-02cd2c6b","com.amazonaws.us-east-1.dynamodb","IPv4","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-02cd2c6b","AWS"
+"pl-05c0959a59362110e","com.amazonaws.us-east-1.ipv6.route53-healthchecks","IPv6","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-05c0959a59362110e","AWS"
+"pl-062e1d6f8317caab5","com.amazonaws.us-east-1.route53-healthchecks","IPv4","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-062e1d6f8317caab5","AWS"
+"pl-073555187c4e6ccf2","com.amazonaws.us-east-1.ipv6.vpc-lattice","IPv6","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-073555187c4e6ccf2","AWS"
+"pl-07cbd8b5e26960eac","com.amazonaws.us-east-1.vpc-lattice","IPv4","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-07cbd8b5e26960eac","AWS"
+"pl-09f90e410b133fe9f","com.amazonaws.us-east-1.ipv6.ec2-instance-connect","IPv6","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-09f90e410b133fe9f","AWS"
+"pl-0e4bcff02b13bef1e","com.amazonaws.us-east-1.ec2-instance-connect","IPv4","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-0e4bcff02b13bef1e","AWS"
+"pl-0e5696d987d033653","com.amazonaws.global.groundstation","IPv4","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-0e5696d987d033653","AWS"
+"pl-3b927c52","com.amazonaws.global.cloudfront.origin-facing","IPv4","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-3b927c52","AWS"
+"pl-63a5400a","com.amazonaws.us-east-1.s3","IPv4","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-63a5400a","AWS"
+"pl-d928c6b0","com.amazonaws.us-east-1.s3express","IPv4","create-complete","arn:aws:ec2:us-east-1:aws:prefix-list/pl-d928c6b0","AWS"

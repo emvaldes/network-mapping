@@ -1,0 +1,546 @@
+#!/usr/bin/env bash
+## File: /usr/local/bin/network-mapping/modules/reports-shared.shell
+
+#------------------------------------------------------------------------------#
+
+set -euo pipefail;
+## set -x;
+
+export LC_ALL=C;
+
+export TMP_DIR="$( mktemp -d )";
+trap '[[ -d "${TMP_DIR}" ]] && rm -rf "${TMP_DIR}"' EXIT;
+
+#------------------------------------------------------------------------------#
+# Locate the latest reports folder
+#------------------------------------------------------------------------------#
+
+[[ -n ${1:-} ]] && base_folder="${1}" || {
+  echo -e "ERROR: Missing base capture folder path";
+  exit 1;
+};
+
+shared_folder="${base_folder}/shared";
+exports_folder="exports/${base_folder}";
+
+mkdir -p "${exports_folder}";
+
+echo -e "Using shared folder: ${shared_folder}";
+echo -e "Exporting CSV files to: ${exports_folder}";
+echo -e;
+
+#------------------------------------------------------------------------------#
+# Report: TGW Advertised Routes - CSV Output
+# Processes each advertised route JSON file under shared/advertised/
+# Extracts:
+# - DestinationCidrBlock, State, Type
+# - TransitGatewayAttachmentId, ResourceId, ResourceType
+#------------------------------------------------------------------------------#
+
+function report_tgw_advertised_routes () {
+
+    local output_file="${exports_folder}/tgw_advertised_routes.csv";
+    : > "${output_file}";
+
+    for target_file in "${shared_folder}/advertised"/tgw*.json; do
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      ## Define the CSV headers as an array
+      local headers=(
+        DestinationCidrBlock
+        State
+        Type
+        TransitGatewayRouteTableAnnouncementId
+        AdditionalRoutesAvailable
+        TransitGatewayAttachmentId
+        ResourceId
+        ResourceType
+      ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+      jq -r '
+        (.Routes // [])[] as $route
+        | ($route.TransitGatewayAttachments // [{}])[] as $attach
+        | [
+            ($route.DestinationCidrBlock // "-"),
+            ($route.State // "-"),
+            ($route.Type // "-"),
+            ($route.TransitGatewayRouteTableAnnouncementId // "-"),
+            (.AdditionalRoutesAvailable // "-"),
+            ($attach.TransitGatewayAttachmentId // "-"),
+            ($attach.ResourceId // "-"),
+            ($attach.ResourceType // "-")
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-tgw-advertised-routes='report_tgw_advertised_routes';
+
+#------------------------------------------------------------------------------#
+# Report: TGW Associated Routes - CSV Output (Expanded)
+# Processes each associated route JSON file under shared/associated/
+# Extracts:
+# - DestinationCidrBlock, State, Type
+# - TransitGatewayRouteTableAnnouncementId, AdditionalRoutesAvailable
+# - TransitGatewayAttachmentId, ResourceId, ResourceType
+#------------------------------------------------------------------------------#
+
+function report_tgw_associated_routes () {
+
+    local output_file="${exports_folder}/tgw_associated_routes.csv";
+    : > "${output_file}";
+
+    for target_file in "${shared_folder}/associated"/tgw*.json; do
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      ## Define the CSV headers as an array
+      local headers=(
+        TransitGatewayAttachmentId
+        ResourceId
+        ResourceType
+        State
+      ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+      jq -r '
+        (.Associations // [])[] |
+        [
+            (.TransitGatewayAttachmentId // "-"),
+            (.ResourceId // "-"),
+            (.ResourceType // "-"),
+            (.State // "-")
+        ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-tgw-associated-routes='report_tgw_associated_routes';
+
+#------------------------------------------------------------------------------#
+# Report: TGW Propagated Routes - CSV Output (Corrected)
+# Processes each propagated route JSON file under shared/propagated/
+# Extracts:
+# - TransitGatewayAttachmentId, ResourceId, ResourceType, State
+#------------------------------------------------------------------------------#
+
+function report_tgw_propagated_routes () {
+
+    local output_file="${exports_folder}/tgw_propagated_routes.csv";
+    : > "${output_file}";
+
+    for target_file in "${shared_folder}/propagated"/tgw*.json; do
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      ## Define the CSV headers as an array
+      local headers=(
+        TransitGatewayAttachmentId
+        ResourceId
+        ResourceType
+        State
+      ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+      jq -r '
+        (.TransitGatewayRouteTablePropagations // [])[] |
+        [
+            (.TransitGatewayAttachmentId // "-"),
+            (.ResourceId // "-"),
+            (.ResourceType // "-"),
+            (.State // "-")
+        ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-tgw-propagated-routes='report_tgw_propagated_routes';
+
+#------------------------------------------------------------------------------#
+# Report: Caller Identity - CSV Output
+# Processes the shared/caller_identity.json file
+# Extracts:
+# - Account, UserId, Arn
+#------------------------------------------------------------------------------#
+
+function report_caller_identity () {
+
+    local output_file="${exports_folder}/caller_identity.csv";
+    : > "${output_file}";
+
+    local target_file="${shared_folder}/caller_identity.json";
+    if [[ ! -f "${target_file}" ]]; then
+            # echo -e "Skipping: ${target_file} not found";
+            continue;
+      else  echo -e "\nProcessing: ${target_file}";
+    fi;
+
+    ## Define the CSV headers as an array
+    local headers=(
+      Account
+      UserId
+      Arn
+    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+    jq -r '
+      [
+        .Account,
+        .UserId,
+        .Arn
+      ] | @csv
+    ' "${target_file}" | tee -a "${output_file}";
+
+    return 0;
+}; alias report-caller-identity='report_caller_identity';
+
+#------------------------------------------------------------------------------#
+# Report: Elastic IPs - CSV Output
+# Processes the shared/elastic_ips.json file
+# Extracts:
+# - PublicIp, AllocationId, AssociatedInstance, AssociatedNetworkInterface
+#------------------------------------------------------------------------------#
+
+function report_elastic_ips () {
+
+    local output_file="${exports_folder}/elastic_ips.csv";
+    : > "${output_file}";
+
+    local target_file="${shared_folder}/elastic_ips.json";
+    if [[ ! -f "${target_file}" ]]; then
+            # echo -e "Skipping: ${target_file} not found";
+            continue;
+      else  echo -e "\nProcessing: ${target_file}";
+    fi;
+
+    ## Define the CSV headers as an array
+    local headers=(
+      PublicIp
+      AllocationId
+      AssociatedInstance
+      AssociatedNetworkInterface
+    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+    jq -r '
+      .[]? |
+      [
+        (.PublicIp // "-"),
+        (.AllocationId // "-"),
+        (.AssociatedInstance // "-"),
+        (.AssociatedNetworkInterface // "-")
+      ] | @csv
+    ' "${target_file}" | tee -a "${output_file}";
+
+    return 0;
+}; alias report-elastic-ips='report_elastic_ips';
+
+#------------------------------------------------------------------------------#
+# Report: Managed Instances - CSV Output
+# Processes the shared/managed_instances.json file
+# Extracts:
+# - InstanceId, PingStatus, PlatformType, LastPingDateTime, IPAddress,
+#   ComputerName, AgentVersion, IsLatestVersion, ResourceType, AssociationStatus,
+#   LastAssociationExecutionDate, LastSuccessfulAssociationExecutionDate, SourceId, SourceType,
+#   AssociationOverview.DetailedStatus, and nested association counts.
+#------------------------------------------------------------------------------#
+
+function report_managed_instances () {
+
+    local output_file="${exports_folder}/managed_instances.csv";
+    : > "${output_file}";
+
+    local target_file="${shared_folder}/managed_instances.json";
+    if [[ ! -f "${target_file}" ]]; then
+            # echo -e "Skipping: ${target_file} not found";
+            continue;
+      else  echo -e "\nProcessing: ${target_file}";
+    fi;
+
+    ## Define the CSV headers as an array
+    local headers=(
+      InstanceId
+      PingStatus
+      PlatformType
+      LastPingDateTime
+      IPAddress
+      ComputerName
+      AgentVersion
+      IsLatestVersion
+      ResourceType
+      AssociationStatus
+      LastAssociationExecutionDate
+      LastSuccessfulAssociationExecutionDate
+      SourceId
+      SourceType
+      AssociationOverview.DetailedStatus
+      AssociationOverview.InstanceAssociationStatusAggregatedCount.Failed
+      AssociationOverview.InstanceAssociationStatusAggregatedCount.Success
+    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+    jq -r '
+      .InstanceInformationList[]? |
+      [
+        (.InstanceId // "-"),
+        (.PingStatus // "-"),
+        (.PlatformType // "-"),
+        (.LastPingDateTime // "-"),
+        (.IPAddress // "-"),
+        (.ComputerName // "-"),
+        (.AgentVersion // "-"),
+        (.IsLatestVersion | tostring // "-"),
+        (.ResourceType // "-"),
+        (.AssociationStatus // "-"),
+        (.LastAssociationExecutionDate // "-"),
+        (.LastSuccessfulAssociationExecutionDate // "-"),
+        (.SourceId // "-"),
+        (.SourceType // "-"),
+        (.AssociationOverview.DetailedStatus // "-"),
+        (.AssociationOverview.InstanceAssociationStatusAggregatedCount.Failed // "0"),
+        (.AssociationOverview.InstanceAssociationStatusAggregatedCount.Success // "0")
+      ] | @csv
+    ' "${target_file}" | tee -a "${output_file}";
+
+    return 0;
+}; alias report-managed-instances='report_managed_instances';
+
+#------------------------------------------------------------------------------#
+# Report: Prefix Lists - CSV Output
+# Processes the shared/prefix_lists.json file
+# Extracts:
+# - PrefixListId, PrefixListName, AddressFamily, State, PrefixListArn, OwnerId
+#------------------------------------------------------------------------------#
+
+function report_prefix_lists () {
+
+    local output_file="${exports_folder}/prefix_lists.csv";
+    : > "${output_file}";
+
+    local target_file="${shared_folder}/prefix_lists.json";
+    if [[ ! -f "${target_file}" ]]; then
+            # echo -e "Skipping: ${target_file} not found";
+            continue;
+      else  echo -e "\nProcessing: ${target_file}";
+    fi;
+
+    ## Define the CSV headers as an array
+    local headers=(
+      PrefixListId
+      PrefixListName
+      AddressFamily
+      State
+      PrefixListArn
+      OwnerId
+    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+    jq -r '
+      .PrefixLists[]? |
+      [
+        (.PrefixListId // "-"),
+        (.PrefixListName // "-"),
+        (.AddressFamily // "-"),
+        (.State // "-"),
+        (.PrefixListArn // "-"),
+        (.OwnerId // "-")
+      ] | @csv
+    ' "${target_file}" | tee -a "${output_file}";
+
+    return 0;
+}; alias report-prefix-lists='report_prefix_lists';
+
+#------------------------------------------------------------------------------#
+# Report: TGW Route Tables - CSV Output
+# Processes the shared/tgw_route_tables.json file
+# Extracts:
+# - TransitGatewayRouteTableId, TransitGatewayId, State,
+#   DefaultAssociationRouteTable, DefaultPropagationRouteTable, CreationTime
+#------------------------------------------------------------------------------#
+
+function report_tgw_route_tables () {
+
+    local output_file="${exports_folder}/tgw_route_tables.csv";
+    : > "${output_file}";
+
+    local target_file="${shared_folder}/tgw_route_tables.json";
+    if [[ ! -f "${target_file}" ]]; then
+            # echo -e "Skipping: ${target_file} not found";
+            continue;
+      else  echo -e "\nProcessing: ${target_file}";
+    fi;
+
+    ## Define the CSV headers as an array
+    local headers=(
+      TransitGatewayRouteTableId
+      TransitGatewayId
+      State
+      DefaultAssociationRouteTable
+      DefaultPropagationRouteTable
+      CreationTime
+    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+    jq -r '
+      .[]? |
+      [
+        (.TransitGatewayRouteTableId // "-"),
+        (.TransitGatewayId // "-"),
+        (.State // "-"),
+        (.DefaultAssociationRouteTable | tostring // "-"),
+        (.DefaultPropagationRouteTable | tostring // "-"),
+        (.CreationTime // "-")
+      ] | @csv
+    ' "${target_file}" | tee -a "${output_file}";
+
+    return 0;
+}; alias report-tgw-route-tables='report_tgw_route_tables';
+
+#------------------------------------------------------------------------------#
+# Report: Transit Gateways - CSV Output
+# Processes the shared/transit_gateways.json file
+# Extracts:
+# - TransitGatewayId, TransitGatewayArn, State, OwnerId, Description, CreationTime
+# - Options (AmazonSideAsn, AutoAcceptSharedAttachments, etc.)
+# - Tags (concatenated as key=value pairs)
+#------------------------------------------------------------------------------#
+
+function report_transit_gateways () {
+
+    local output_file="${exports_folder}/transit_gateways.csv";
+    : > "${output_file}";
+
+    local target_file="${shared_folder}/transit_gateways.json";
+    if [[ ! -f "${target_file}" ]]; then
+            # echo -e "Skipping: ${target_file} not found";
+            continue;
+      else  echo -e "\nProcessing: ${target_file}";
+    fi;
+
+    ## Define the CSV headers as an array
+    local headers=(
+      TransitGatewayId
+      TransitGatewayArn
+      State
+      OwnerId
+      Description
+      CreationTime
+      AmazonSideAsn
+      AutoAcceptSharedAttachments
+      DefaultRouteTableAssociation
+      AssociationDefaultRouteTableId
+      DefaultRouteTablePropagation
+      PropagationDefaultRouteTableId
+      VpnEcmpSupport
+      DnsSupport
+      SecurityGroupReferencingSupport
+      MulticastSupport
+      Tags
+    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+    jq -r '
+      .TransitGateways[]? |
+      [
+        (.TransitGatewayId // "-"),
+        (.TransitGatewayArn // "-"),
+        (.State // "-"),
+        (.OwnerId // "-"),
+        (.Description // "-"),
+        (.CreationTime // "-"),
+        (.Options.AmazonSideAsn | tostring // "-"),
+        (.Options.AutoAcceptSharedAttachments // "-"),
+        (.Options.DefaultRouteTableAssociation // "-"),
+        (.Options.AssociationDefaultRouteTableId // "-"),
+        (.Options.DefaultRouteTablePropagation // "-"),
+        (.Options.PropagationDefaultRouteTableId // "-"),
+        (.Options.VpnEcmpSupport // "-"),
+        (.Options.DnsSupport // "-"),
+        (.Options.SecurityGroupReferencingSupport // "-"),
+        (.Options.MulticastSupport // "-"),
+        (
+          (.Tags // [])
+          | map("\(.Key)=\(.Value)") | join(";")
+        )
+      ] | @csv
+    ' "${target_file}" | tee -a "${output_file}";
+
+    return 0;
+}; alias report-transit-gateways='report_transit_gateways';
+
+#------------------------------------------------------------------------------#
+# Report: VPC Peering - CSV Output
+# Processes the shared/vpc_peering.json file
+# Extracts:
+# - VpcPeeringConnectionId, Status.Code, Accepter/Requester VPC details,
+#   Peering options, Regions, and concatenated Tags.
+#------------------------------------------------------------------------------#
+
+function report_vpc_peering () {
+
+    local output_file="${exports_folder}/vpc_peering.csv";
+    : > "${output_file}";
+
+    local target_file="${shared_folder}/vpc_peering.json";
+    if [[ ! -f "${target_file}" ]]; then
+            # echo -e "Skipping: ${target_file} not found";
+            continue;
+      else  echo -e "\nProcessing: ${target_file}";
+    fi;
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VpcPeeringConnectionId
+      StatusCode
+      AccepterVpcId
+      AccepterOwnerId
+      AccepterRegion
+      AccepterCidrBlock
+      RequesterVpcId
+      RequesterOwnerId
+      RequesterRegion
+      RequesterCidrBlock
+      AllowDnsResolutionFromRemoteVpc
+      AllowEgressFromLocalClassicLinkToRemoteVpc
+      AllowEgressFromLocalVpcToRemoteClassicLink
+      Tags
+    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+    jq -r '
+      .VpcPeeringConnections[]? |
+      [
+        (.VpcPeeringConnectionId // "-"),
+        (.Status.Code // "-"),
+        (.AccepterVpcInfo.VpcId // "-"),
+        (.AccepterVpcInfo.OwnerId // "-"),
+        (.AccepterVpcInfo.Region // "-"),
+        (.AccepterVpcInfo.CidrBlock // "-"),
+        (.RequesterVpcInfo.VpcId // "-"),
+        (.RequesterVpcInfo.OwnerId // "-"),
+        (.RequesterVpcInfo.Region // "-"),
+        (.RequesterVpcInfo.CidrBlock // "-"),
+        (.RequesterVpcInfo.PeeringOptions.AllowDnsResolutionFromRemoteVpc | tostring // "-"),
+        (.RequesterVpcInfo.PeeringOptions.AllowEgressFromLocalClassicLinkToRemoteVpc | tostring // "-"),
+        (.RequesterVpcInfo.PeeringOptions.AllowEgressFromLocalVpcToRemoteClassicLink | tostring // "-"),
+        (
+          (.Tags // [])
+          | map("\(.Key)=\(.Value)") | join(";")
+        )
+      ] | @csv
+    ' "${target_file}" | tee -a "${output_file}";
+
+    return 0;
+}; alias report-vpc-peering='report_vpc_peering';
+
+report_tgw_advertised_routes; echo -e;
+report_tgw_associated_routes; echo -e;
+report_tgw_propagated_routes; echo -e;
+report_caller_identity; echo -e;
+report_elastic_ips; echo -e;
+report_managed_instances; echo -e;
+report_prefix_lists; echo -e;
+report_tgw_route_tables; echo -e;
+report_transit_gateways; echo -e;
+report_vpc_peering; echo -e;

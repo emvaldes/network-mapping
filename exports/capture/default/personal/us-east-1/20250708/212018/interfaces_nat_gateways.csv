@@ -1,0 +1,2 @@
+VPC,NetworkInterfaceId,AttachmentId,Description,Status,SubnetId,VpcId,PrivateIpAddress,PublicIp,InterfaceType
+"devops-public-vpc","eni-097f65912e6e582e8","ela-attach-022b01bfba451b920","Interface for NAT Gateway nat-049d8400adc86f196","in-use","subnet-03ea1805ea65cba01","vpc-028b2dc2728406fd9","10.0.1.190","13.223.16.32","nat_gateway"

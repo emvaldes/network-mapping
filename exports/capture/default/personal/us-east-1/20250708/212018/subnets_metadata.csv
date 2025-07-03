@@ -1,0 +1,4 @@
+VPC,Subnet,SubnetId,VpcId,CidrBlock,AvailabilityZone,AvailableIpAddressCount,MapPublicIpOnLaunch,DefaultForAz,State,Name,DevOps
+"devops-locked-vpc","devops-locked-subnet","subnet-0a7863c4791ae49f2","vpc-0f7fa8fdff02da590","10.2.1.0/24","us-east-1a",237,"false","false","available","devops-locked-subnet","true"
+"devops-private-vpc","devops-private-subnet","subnet-0ebc71f9acbeba83c","vpc-0dd98b0cb5d3ded56","10.1.1.0/24","us-east-1a",242,"false","false","available","devops-private-subnet","true"
+"devops-public-vpc","devops-public-subnet","subnet-03ea1805ea65cba01","vpc-028b2dc2728406fd9","10.0.1.0/24","us-east-1a",248,"true","false","available","devops-public-subnet","true"

@@ -1,0 +1,218 @@
+{
+    "SecurityGroups": [
+        {
+            "GroupId": "sg-04be87c0bbfebdcde",
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "-1",
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ],
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-VPCInterfaceEndpointSG"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "PrivateVPCEndpointSG"
+                }
+            ],
+            "VpcId": "vpc-0dd98b0cb5d3ded56",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-1:***:security-group/sg-04be87c0bbfebdcde",
+            "OwnerId": "***",
+            "GroupName": "network-mapping-PrivateVPCEndpointSG-0DgSEpKTNTcZ",
+            "Description": "Access control for private VPC endpoints",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 443,
+                    "ToPort": 443,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        },
+        {
+            "GroupId": "sg-06a55a043c365a161",
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 443,
+                    "ToPort": 443,
+                    "UserIdGroupPairs": [
+                        {
+                            "UserId": "***",
+                            "GroupId": "sg-0cdf97b87f269a5a2"
+                        }
+                    ],
+                    "IpRanges": [],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ],
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "EC2PrivateInstanceSecurityGroup"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EC2InstancePrivate-SG"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                }
+            ],
+            "VpcId": "vpc-0dd98b0cb5d3ded56",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-1:***:security-group/sg-06a55a043c365a161",
+            "OwnerId": "***",
+            "GroupName": "network-mapping-EC2PrivateInstanceSecurityGroup-npruG2C3gq4Z",
+            "Description": "Allow SSH from Public EC2",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 22,
+                    "ToPort": 22,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "10.0.0.0/16"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        },
+        {
+            "GroupId": "sg-09e88a5ff3f580ace",
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "-1",
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ],
+            "VpcId": "vpc-0dd98b0cb5d3ded56",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-1:***:security-group/sg-09e88a5ff3f580ace",
+            "OwnerId": "***",
+            "GroupName": "default",
+            "Description": "default VPC security group",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "-1",
+                    "UserIdGroupPairs": [
+                        {
+                            "UserId": "***",
+                            "GroupId": "sg-09e88a5ff3f580ace"
+                        }
+                    ],
+                    "IpRanges": [],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        },
+        {
+            "GroupId": "sg-0cdf97b87f269a5a2",
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 443,
+                    "ToPort": 443,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ],
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "PrivateSSMEndpointSG"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-SSMEndpointSG"
+                }
+            ],
+            "VpcId": "vpc-0dd98b0cb5d3ded56",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-1:***:security-group/sg-0cdf97b87f269a5a2",
+            "OwnerId": "***",
+            "GroupName": "network-mapping-PrivateSSMEndpointSG-y9kAAznFSNEZ",
+            "Description": "Access control for SSM VPC interface endpoints",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 443,
+                    "ToPort": 443,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "10.1.0.0/16"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        }
+    ]
+}

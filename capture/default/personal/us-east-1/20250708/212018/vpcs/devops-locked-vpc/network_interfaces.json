@@ -1,0 +1,589 @@
+{
+    "NetworkInterfaces": [
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-015758e34afc7161d",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-0183586ade28a3487",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:d5:d1:6b:31:b3",
+            "NetworkInterfaceId": "eni-0333a5f26ecfbe3d3",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-145.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.145",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-145.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.145"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-059fd906dc954376d",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-08dbbd58f7573d512",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:3c:03:92:85:0b",
+            "NetworkInterfaceId": "eni-008beffa32e97cea5",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-232.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.232",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-232.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.232"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-065c56ff9c2df7a4f",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-07e3c737e14d68440",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:eb:90:bb:2d:43",
+            "NetworkInterfaceId": "eni-036c6bc4322541945",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-253.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.253",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-253.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.253"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-00db204da02476a86",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-0e4c07aa29817be75",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:71:69:be:4f:db",
+            "NetworkInterfaceId": "eni-0b3b46a62db3f2b50",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-57.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.57",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-57.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.57"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-06e6ca5585e92bdb2",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-04586057e6b9b81db",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:62:21:a3:95:c3",
+            "NetworkInterfaceId": "eni-0f125d18eb8b3ab69",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-173.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.173",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-173.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.173"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-08d0d2576a6a23343",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-02956469f1b13181d",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:8c:d2:f9:e7:d5",
+            "NetworkInterfaceId": "eni-0480056519e4fc83b",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-86.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.86",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-86.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.86"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-04fff0aa3f031aa69",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-0b3ff0d121c4eb4ae",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:a3:a9:3e:fb:bb",
+            "NetworkInterfaceId": "eni-037bfcb48e40337b1",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-217.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.217",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-217.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.217"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-0f5305d37a553ec83",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-086fb7be5b7d2272d",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:95:10:bc:13:fd",
+            "NetworkInterfaceId": "eni-03c5529fcc6eb85c8",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-37.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.37",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-37.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.37"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-02bfd6f07494ec853",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-0e0e6e23dc2b93126",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:07:d0:97:9f:11",
+            "NetworkInterfaceId": "eni-04e061e5cabd22dfa",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-23.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.23",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-23.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.23"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-0a9af60662e8d09cf",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-0112c1a1538953d7d",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:42:c8:0f:da:3b",
+            "NetworkInterfaceId": "eni-0aee84ac0b5b89fc5",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-113.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.113",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-113.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.113"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-066f2b94613644a69",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-0b642e67cbc147924",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:60:45:11:3e:cb",
+            "NetworkInterfaceId": "eni-01e634f18e3dea91a",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-32.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.32",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-32.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.32"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-0c510a2b30c936f3c",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "Network Interface for Transit Gateway Attachment tgw-attach-0a3e2ed35a7e0b36b",
+            "Groups": [],
+            "InterfaceType": "transit_gateway",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:62:e5:6f:e6:bf",
+            "NetworkInterfaceId": "eni-05bb8586e2fb873f7",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-72.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.72",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-72.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.72"
+                }
+            ],
+            "RequesterId": "936118442230",
+            "RequesterManaged": false,
+            "SourceDestCheck": false,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachTime": "2025-07-09T04:13:06+00:00",
+                "AttachmentId": "eni-attach-06927e3e4562a32a9",
+                "DeleteOnTermination": true,
+                "DeviceIndex": 0,
+                "NetworkCardIndex": 0,
+                "InstanceId": "i-0cfc29aca7e1130c3",
+                "InstanceOwnerId": "***",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "interface",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:3c:52:6f:7e:99",
+            "NetworkInterfaceId": "eni-04ab9e057532facfe",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-191.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.191",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-191.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.191"
+                }
+            ],
+            "RequesterManaged": false,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        },
+        {
+            "Attachment": {
+                "AttachmentId": "ela-attach-0b90da7c8347d4d7f",
+                "DeleteOnTermination": false,
+                "DeviceIndex": 1,
+                "InstanceOwnerId": "amazon-aws",
+                "Status": "attached"
+            },
+            "AvailabilityZone": "us-east-1a",
+            "Description": "VPC Endpoint Interface vpce-03cc85fabe0665b8a",
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "InterfaceType": "vpc_endpoint",
+            "Ipv6Addresses": [],
+            "MacAddress": "02:34:63:58:c9:a9",
+            "NetworkInterfaceId": "eni-07629cb0c7a42ed3f",
+            "OwnerId": "***",
+            "PrivateDnsName": "ip-10-2-1-198.ec2.internal",
+            "PublicDnsName": "",
+            "PrivateIpAddress": "10.2.1.198",
+            "PrivateIpAddresses": [
+                {
+                    "Primary": true,
+                    "PrivateDnsName": "ip-10-2-1-198.ec2.internal",
+                    "PrivateIpAddress": "10.2.1.198"
+                }
+            ],
+            "RequesterId": "727180483921",
+            "RequesterManaged": true,
+            "SourceDestCheck": true,
+            "Status": "in-use",
+            "SubnetId": "subnet-0a7863c4791ae49f2",
+            "TagSet": [],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "Operator": {
+                "Managed": false
+            }
+        }
+    ]
+}

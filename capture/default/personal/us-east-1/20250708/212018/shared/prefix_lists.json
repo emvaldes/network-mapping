@@ -1,0 +1,103 @@
+{
+    "PrefixLists": [
+        {
+            "PrefixListId": "pl-02cd2c6b",
+            "AddressFamily": "IPv4",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-02cd2c6b",
+            "PrefixListName": "com.amazonaws.us-east-1.dynamodb",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-05c0959a59362110e",
+            "AddressFamily": "IPv6",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-05c0959a59362110e",
+            "PrefixListName": "com.amazonaws.us-east-1.ipv6.route53-healthchecks",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-062e1d6f8317caab5",
+            "AddressFamily": "IPv4",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-062e1d6f8317caab5",
+            "PrefixListName": "com.amazonaws.us-east-1.route53-healthchecks",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-073555187c4e6ccf2",
+            "AddressFamily": "IPv6",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-073555187c4e6ccf2",
+            "PrefixListName": "com.amazonaws.us-east-1.ipv6.vpc-lattice",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-07cbd8b5e26960eac",
+            "AddressFamily": "IPv4",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-07cbd8b5e26960eac",
+            "PrefixListName": "com.amazonaws.us-east-1.vpc-lattice",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-09f90e410b133fe9f",
+            "AddressFamily": "IPv6",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-09f90e410b133fe9f",
+            "PrefixListName": "com.amazonaws.us-east-1.ipv6.ec2-instance-connect",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-0e4bcff02b13bef1e",
+            "AddressFamily": "IPv4",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-0e4bcff02b13bef1e",
+            "PrefixListName": "com.amazonaws.us-east-1.ec2-instance-connect",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-0e5696d987d033653",
+            "AddressFamily": "IPv4",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-0e5696d987d033653",
+            "PrefixListName": "com.amazonaws.global.groundstation",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-3b927c52",
+            "AddressFamily": "IPv4",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-3b927c52",
+            "PrefixListName": "com.amazonaws.global.cloudfront.origin-facing",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-63a5400a",
+            "AddressFamily": "IPv4",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-63a5400a",
+            "PrefixListName": "com.amazonaws.us-east-1.s3",
+            "Tags": [],
+            "OwnerId": "AWS"
+        },
+        {
+            "PrefixListId": "pl-d928c6b0",
+            "AddressFamily": "IPv4",
+            "State": "create-complete",
+            "PrefixListArn": "arn:aws:ec2:us-east-1:aws:prefix-list/pl-d928c6b0",
+            "PrefixListName": "com.amazonaws.us-east-1.s3express",
+            "Tags": [],
+            "OwnerId": "AWS"
+        }
+    ]
+}

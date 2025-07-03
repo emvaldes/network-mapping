@@ -1,0 +1,63 @@
+{
+    "RouteTables": [
+        {
+            "Associations": [
+                {
+                    "Main": false,
+                    "RouteTableAssociationId": "rtbassoc-0e530405ef03510d6",
+                    "RouteTableId": "rtb-094fea2f99bb0acc9",
+                    "SubnetId": "subnet-0a7863c4791ae49f2",
+                    "AssociationState": {
+                        "State": "associated"
+                    }
+                }
+            ],
+            "PropagatingVgws": [],
+            "RouteTableId": "rtb-094fea2f99bb0acc9",
+            "Routes": [
+                {
+                    "DestinationCidrBlock": "10.2.0.0/16",
+                    "GatewayId": "local",
+                    "Origin": "CreateRouteTable",
+                    "State": "active"
+                },
+                {
+                    "DestinationCidrBlock": "0.0.0.0/0",
+                    "TransitGatewayId": "tgw-001bc8550c79f14b9",
+                    "Origin": "CreateRoute",
+                    "State": "active"
+                },
+                {
+                    "DestinationPrefixListId": "pl-63a5400a",
+                    "GatewayId": "vpce-020af608b10402b00",
+                    "Origin": "CreateRoute",
+                    "State": "active"
+                }
+            ],
+            "Tags": [
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-LockedRouteTable"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsRouteTable"
+                }
+            ],
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "OwnerId": "***"
+        }
+    ]
+}

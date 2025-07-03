@@ -1,0 +1,4 @@
+VPC,GroupId,GroupName,Description,VpcId,OwnerId,SecurityGroupArn,IngressProtocols,EgressProtocols
+"devops-locked-vpc","sg-0781d2cfe7578f891","default","default VPC security group","vpc-0f7fa8fdff02da590","***","arn:aws:ec2:us-east-1:***:security-group/sg-0781d2cfe7578f891","-1","-1"
+"devops-private-vpc","sg-09e88a5ff3f580ace","default","default VPC security group","vpc-0dd98b0cb5d3ded56","***","arn:aws:ec2:us-east-1:***:security-group/sg-09e88a5ff3f580ace","-1","-1"
+"devops-public-vpc","sg-0c5a524d10af6efe9","default","default VPC security group","vpc-028b2dc2728406fd9","***","arn:aws:ec2:us-east-1:***:security-group/sg-0c5a524d10af6efe9","-1","-1"

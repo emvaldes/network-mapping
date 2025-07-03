@@ -1,0 +1,47 @@
+{
+    "Vpcs": [
+        {
+            "OwnerId": "***",
+            "InstanceTenancy": "default",
+            "CidrBlockAssociationSet": [
+                {
+                    "AssociationId": "vpc-cidr-assoc-09e87534951e20d03",
+                    "CidrBlock": "10.0.0.0/16",
+                    "CidrBlockState": {
+                        "State": "associated"
+                    }
+                }
+            ],
+            "IsDefault": false,
+            "Tags": [
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "PublicVPC"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "devops-public-vpc"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                }
+            ],
+            "BlockPublicAccessStates": {
+                "InternetGatewayBlockMode": "off"
+            },
+            "VpcId": "vpc-028b2dc2728406fd9",
+            "State": "available",
+            "CidrBlock": "10.0.0.0/16",
+            "DhcpOptionsId": "dopt-b1e813ca"
+        }
+    ]
+}

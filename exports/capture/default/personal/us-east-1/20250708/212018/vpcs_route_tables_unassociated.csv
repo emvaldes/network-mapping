@@ -1,0 +1,4 @@
+VPC,RouteTableId,VpcId,OwnerId,AssociationId,AssociationState,Main,DestinationCidrBlock,GatewayId,Origin,RouteState,Tags
+"devops-locked-vpc","rtb-093b34380bb136a61","vpc-0f7fa8fdff02da590","***","rtbassoc-0f65cbd42e1c4db02","associated","true","10.2.0.0/16","local","CreateRouteTable","active",""
+"devops-private-vpc","rtb-05c18e151ae6ed214","vpc-0dd98b0cb5d3ded56","***","rtbassoc-0847c3bd9eaf8fbb9","associated","true","10.1.0.0/16","local","CreateRouteTable","active",""
+"devops-public-vpc","rtb-0c47202b5a86ce142","vpc-028b2dc2728406fd9","***","rtbassoc-02a8bd685ed7c6224","associated","true","10.0.0.0/16","local","CreateRouteTable","active",""

@@ -1,0 +1,39 @@
+[
+  {
+    "Attachment": {
+      "AttachmentId": "ela-attach-05c7491e4a4094053",
+      "DeleteOnTermination": false,
+      "DeviceIndex": 1,
+      "InstanceOwnerId": "amazon-aws",
+      "Status": "attached"
+    },
+    "AvailabilityZone": "us-east-1a",
+    "Description": "Network Interface for Transit Gateway Attachment tgw-attach-0189b5caa6e869108",
+    "Groups": [],
+    "InterfaceType": "transit_gateway",
+    "Ipv6Addresses": [],
+    "MacAddress": "02:a6:83:be:86:29",
+    "NetworkInterfaceId": "eni-07d7dc8112f5ab038",
+    "OwnerId": "***",
+    "PrivateDnsName": "ip-10-0-1-193.ec2.internal",
+    "PublicDnsName": "",
+    "PrivateIpAddress": "10.0.1.193",
+    "PrivateIpAddresses": [
+      {
+        "Primary": true,
+        "PrivateDnsName": "ip-10-0-1-193.ec2.internal",
+        "PrivateIpAddress": "10.0.1.193"
+      }
+    ],
+    "RequesterId": "936118442230",
+    "RequesterManaged": false,
+    "SourceDestCheck": false,
+    "Status": "in-use",
+    "SubnetId": "subnet-03ea1805ea65cba01",
+    "TagSet": [],
+    "VpcId": "vpc-028b2dc2728406fd9",
+    "Operator": {
+      "Managed": false
+    }
+  }
+]

@@ -1,0 +1,11 @@
+VPC,Subnet,RouteTableId,DestinationCidrBlock,GatewayId,VpcPeeringConnectionId,Origin,State,AssociatedSubnetId,Name,DevOps
+"devops-locked-vpc","devops-locked-subnet","rtb-094fea2f99bb0acc9","10.2.0.0/16","local","-","CreateRouteTable","active","subnet-0a7863c4791ae49f2","DevOps-LockedRouteTable","true"
+"devops-locked-vpc","devops-locked-subnet","rtb-094fea2f99bb0acc9","0.0.0.0/0","-","-","CreateRoute","active","subnet-0a7863c4791ae49f2","DevOps-LockedRouteTable","true"
+"devops-locked-vpc","devops-locked-subnet","rtb-094fea2f99bb0acc9","-","vpce-020af608b10402b00","-","CreateRoute","active","subnet-0a7863c4791ae49f2","DevOps-LockedRouteTable","true"
+"devops-private-vpc","devops-private-subnet","rtb-0a01a0b09d8ff4547","10.0.0.0/16","-","pcx-0b2f7050573bcea16","CreateRoute","active","subnet-0ebc71f9acbeba83c","DevOps-PrivateRouteTable","true"
+"devops-private-vpc","devops-private-subnet","rtb-0a01a0b09d8ff4547","10.1.0.0/16","local","-","CreateRouteTable","active","subnet-0ebc71f9acbeba83c","DevOps-PrivateRouteTable","true"
+"devops-private-vpc","devops-private-subnet","rtb-0a01a0b09d8ff4547","0.0.0.0/0","-","pcx-0b2f7050573bcea16","CreateRoute","active","subnet-0ebc71f9acbeba83c","DevOps-PrivateRouteTable","true"
+"devops-private-vpc","devops-private-subnet","rtb-0a01a0b09d8ff4547","-","vpce-0d3fa9c6ea83d144d","-","CreateRoute","active","subnet-0ebc71f9acbeba83c","DevOps-PrivateRouteTable","true"
+"devops-public-vpc","devops-public-subnet","rtb-0a105b3415eec5b66","10.0.0.0/16","local","-","CreateRouteTable","active","subnet-03ea1805ea65cba01","DevOps-PublicRouteTable","true"
+"devops-public-vpc","devops-public-subnet","rtb-0a105b3415eec5b66","10.1.0.0/16","-","pcx-0b2f7050573bcea16","CreateRoute","active","subnet-03ea1805ea65cba01","DevOps-PublicRouteTable","true"
+"devops-public-vpc","devops-public-subnet","rtb-0a105b3415eec5b66","0.0.0.0/0","igw-00c373c8feb8a9fc9","-","CreateRoute","active","subnet-03ea1805ea65cba01","DevOps-PublicRouteTable","true"

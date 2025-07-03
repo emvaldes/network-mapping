@@ -1,0 +1,312 @@
+#!/usr/bin/env bash
+## File: /usr/local/bin/network-mapping.shell
+
+#------------------------------------------------------------------------------#
+
+set -euo pipefail;
+## set -x;
+
+export LC_ALL=C;
+
+export TMP_DIR="$( mktemp -d )";
+trap '[[ -d "${TMP_DIR}" ]] && rm -rf "${TMP_DIR}"' EXIT;
+
+#------------------------------------------------------------------------------#
+# Load all reusable modules from ./modules
+
+for module in ./scripts/modules/*.shell; do
+  ## shellcheck source=/dev/null
+  source "${module}";
+done;
+
+#------------------------------------------------------------------------------
+# network_mapping
+#
+# Builds a full AWS VPC and Subnet structure for the target region/account.
+#
+# Responsibilities:
+# - Queries all VPCs and subnets in the region.
+# - Builds a nested JSON structure mapping VPCs to their subnets.
+# - Exports a CSV file summarizing VPCs, subnets, and CIDR blocks.
+#
+# Parameters:
+#   - 1: Output file path (for the generated JSON file)
+#
+# Output:
+#   - network-mapping.json (nested VPC/Subnet structure)
+#   - network-mapping.csv (summary of VPC, subnet, and CIDR)
+#------------------------------------------------------------------------------
+
+function network_mapping () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+
+    ## Fetch all VPCs
+    local vpcs_json="$(
+      aws ec2 describe-vpcs \
+          --profile "${target_profile}" \
+          --region "${target_region}" \
+          --output json
+    )";
+
+    ## Fetch all Subnets
+    local subnets_json="$(
+      aws ec2 describe-subnets \
+          --profile "${target_profile}" \
+          --region "${target_region}" \
+          --output json
+    )";
+
+    # Build full VPC + Subnets structure (JSON)
+    jq  --null-input \
+        --argjson vpcs "${vpcs_json}" \
+        --argjson subnets "${subnets_json}" \
+        '{
+          vpcs: (
+            $vpcs.Vpcs | map(
+              . as $vpc | . + {
+                Subnets: (
+                  $subnets.Subnets | map(select(.VpcId == $vpc.VpcId))
+                )
+              }
+            )
+          )
+        }' \
+    > "${output_file}";
+
+    ## Export Subnets CSV
+    local output_csv="${output_file%.json}.csv";
+
+    printf '"vpc","subnet","cidr"\n' > "${output_csv}";
+    jq -r '
+          .vpcs[] as $vpc |
+          ( $vpc.Tags[]? | select( .Key == "Name" ) | .Value ) as $vpc_name |
+          $vpc.Subnets[] |
+          [
+            ( $vpc_name // $vpc.VpcId ),
+            ( .Tags[]? | select( .Key == "Name" ) | .Value ) // .SubnetId,
+            .CidrBlock
+          ] | @csv
+          ' "${output_file}" \
+    >> "${output_csv}";
+
+    return 0;
+}; alias network-mapping='network_mapping';
+
+#------------------------------------------------------------------------------#
+
+target_profile="${1:-default}";
+target_account="${2:-personal}";
+target_region="${3:-us-east-1}";
+
+date_mark="$( date +%Y%m%d )";
+time_mark="$( date +%H%M%S )";
+timestamp="${date_mark}/${time_mark}";
+
+output_format="json";
+
+base_directory="capture/${target_profile}";
+output_directory="${base_directory}/${target_account}/${target_region}/${timestamp}";
+
+mkdir -p "${output_directory}";
+
+## Call the function and write inside the timestamp folder
+network_mapping "${output_directory}/network-mapping.json";
+
+#------------------------------------------------------------------------------#
+
+shared_directory="${output_directory}/shared";
+mkdir -p "${shared_directory}"/{advertised,associated,propagated};
+
+if [[ -z "${tgw_written:-}" ]]; then
+
+  tgw_configurations "${shared_directory}/transit_gateways.json" \
+                     "${shared_directory}/tgw_route_tables.json";
+
+  #----------------------------------------------------------------------------#
+  # Retrieve advertised TGW route tables per Transit Gateway
+  declare -a tgw_ids=();
+  mapfile -t tgw_ids < <(
+    jq -r '.[].TransitGatewayRouteTableId' \
+    "${shared_directory}/tgw_route_tables.json"
+  );
+
+  for tgw_id in "${tgw_ids[@]}"; do
+
+    tgw_route_tables_advertised \
+        "${shared_directory}/advertised/${tgw_id}.json" \
+        "${tgw_id}";
+
+    tgw_route_tables_associations \
+        "${shared_directory}/associated/${tgw_id}.json" \
+        "${tgw_id}";
+
+    tgw_route_tables_propagations \
+        "${shared_directory}/propagated/${tgw_id}.json" \
+        "${tgw_id}";
+
+  done;
+
+  ## Warning: Discard this function as its redundant and problematic.
+  ## tgw_route_tables "${shared_directory}/tgw_route_tables.json";
+
+  tgw_written=true;
+
+fi;
+
+#------------------------------------------------------------------------------#
+
+iam_caller_identity "${shared_directory}/caller_identity.json";
+
+default_vpc "${shared_directory}/default_vpc.json";
+
+elastic_ips "${shared_directory}/elastic_ips.json";
+prefix_lists "${shared_directory}/prefix_lists.json";
+
+#------------------------------------------------------------------------------#
+# Pre-fetch SSM managed instance list so it's available during loop execution #
+
+ssm_managed_instances "${shared_directory}/managed_instances.json" true;
+
+#------------------------------------------------------------------------------#
+
+jq -c '.vpcs[]' "${output_directory}/network-mapping.json" | \
+while read -r vpc; do
+
+  vpc__id="$( jq -r '.VpcId' <<< "${vpc}" )";
+  vpc_name="$(
+    jq -r '[ .Tags[]? | select( .Key=="Name" ) | .Value ] | first // ""' \
+    <<< "${vpc}"
+  )";
+
+  [[ -z "${vpc_name}" ]] && vpc_name="${vpc__id}";
+  echo -e "Processing VPC: ${vpc_name} (${vpc__id})";
+
+  vpc_directory="${output_directory}/vpcs/${vpc_name}";
+  mkdir -p "${vpc_directory}";
+
+  vpc_ec2_instances "${vpc_directory}/vpc_ec2_instances.json" \
+                    "${vpc__id}";
+
+  vpc_metadata "${vpc_directory}/vpc.json" \
+               "${vpc__id}";
+
+  vpc_route_tables "${vpc_directory}/vpc_route_tables.json" \
+                   "${vpc__id}";
+
+  ## Identify unassociated route tables (those with no subnet associations)
+  vpc_route_tables_unassociated \
+      "${vpc_directory}/vpc_route_tables_unassociated.json" \
+      "${vpc_directory}/vpc_route_tables.json";
+
+  vpc_internet_gateways "${vpc_directory}/vpc_igw.json" \
+                        "${vpc__id}";
+
+  vpc_nat_gateways "${vpc_directory}/vpc_nat_gateways.json" \
+                   "${vpc__id}";
+
+  security_groups "${vpc_directory}/security_groups.json" \
+                  "${vpc__id}";
+
+  security_groups_unattached "${vpc_directory}/security_groups_unattached.json" \
+                             "${vpc__id}";
+
+  vpc_network_acls "${vpc_directory}/network_acls.json" \
+                   "${vpc__id}";
+
+  vpc_tgw_attachments "${vpc_directory}/vpc_tgw_attachments.json" \
+                      "${vpc__id}";
+
+  vpc_peering_connections "${shared_directory}/vpc_peering.json" \
+                          "${vpc__id}";
+
+  vpc_endpoints "${vpc_directory}/vpc_endpoints.json" \
+                "${vpc__id}";
+
+  vpc_endpoint_connections "${vpc_directory}" \
+                           "${vpc_directory}/vpc_endpoints.json";
+
+  vpc_dhcp_options "${vpc_directory}/dhcp_options.json" \
+                   "${vpc_directory}/vpc.json";
+
+  vpc_network_interfaces "${vpc_directory}/network_interfaces.json" \
+                         "${vpc__id}";
+
+  #----------------------------------------------------------------------------#
+
+  jq -c '.Subnets[]' <<< "${vpc}" | \
+  while read -r subnet; do
+
+    subnet__id="$( jq -r '.SubnetId' <<< "${subnet}" )";
+    subnet_name="$(
+      jq -r '[ .Tags[]? | select( .Key=="Name" ) | .Value ] | first // ""' \
+      <<< "${subnet}"
+    )";
+
+    cidr_block="$( jq -r '.CidrBlock' <<< "${subnet}" )";
+    [[ -z "${subnet_name}" ]] && subnet_name="${subnet__id}";
+    echo -e "  Mapping subnet: ${subnet_name} (CIDR: ${cidr_block})";
+
+    subnet_directory="${vpc_directory}/subnets/${subnet_name}";
+    mkdir -p "${subnet_directory}";
+
+    vpc_subnet_metadata subnet__id \
+                        "${vpc_directory}" \
+                        "${subnet}" \
+                        "${subnet_name}";
+
+    vpc_subnet_route_tables "${subnet_directory}/subnet_route_tables.json" \
+                            "${subnet__id}";
+
+    route_table__id='';
+    vpc_subnet_route_table_id route_table__id \
+                              "${subnet_directory}/subnet_route_tables.json" \
+                              "${vpc__id}";
+
+    default_route_tables "${subnet_directory}/default_route_tables.json" \
+                         "${route_table__id}";
+
+    ssm_subnet_instances "${subnet_directory}/ec2_instances.json" \
+                         "${subnet__id}";
+
+    ssm_inspect_instances "${subnet_directory}/ec2_instances.json" \
+                          "${subnet_directory}" \
+                          "whoami" \
+                          "uname -a" \
+                          "cat /etc/os-release" \
+                          ;
+
+    bastion_instances='';
+    ec2_bastion_instances bastion_instances \
+                          "${vpc_directory}/vpc_ec2_instances.json" \
+                          "${vpc_directory}/bastion-instances.json";
+
+    ec2_bastion_accessibility \
+      "${bastion_instances}" \
+      "${subnet_directory}/ec2_instances.json" \
+      "${subnet_directory}/private_reachability.json";
+
+    echo -e "Completed mapping for subnet: ${subnet_name}__${subnet__id}";
+
+  done;
+
+done;
+
+echo -e "All reports saved under: ${output_directory}";
+
+#------------------------------------------------------------------------------#
+## Final cleanup step: remove empty or useless JSON files
+
+find "${output_directory}" -type f -name '*.json' | \
+while read -r json_file; do
+
+  if  [[ ! -s "${json_file}" ]] || \
+      [[ -z "$( tr -d '[:space:]' < "${json_file}" )" ]] || \
+      jq -e '( . == {} or . == [] or .[] == [] or .[] == {} )' "${json_file}" >/dev/null 2>&1 || \
+      ! jq empty "${json_file}" >/dev/null 2>&1; then
+
+    rm -f "${json_file}";  ## invalid JSON
+
+  fi;
+
+done;

@@ -1,0 +1,36 @@
+{
+    "InternetGateways": [
+        {
+            "Attachments": [
+                {
+                    "State": "available",
+                    "VpcId": "vpc-028b2dc2728406fd9"
+                }
+            ],
+            "InternetGatewayId": "igw-00c373c8feb8a9fc9",
+            "OwnerId": "***",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "InternetGateway"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-IGW"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                }
+            ]
+        }
+    ]
+}

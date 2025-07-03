@@ -1,0 +1,7 @@
+VPC,DhcpOptionsId,OwnerId,Key,Values,Tags
+"devops-locked-vpc","dopt-b1e813ca","***","domain-name","ec2.internal","Name=default"
+"devops-locked-vpc","dopt-b1e813ca","***","domain-name-servers","AmazonProvidedDNS","Name=default"
+"devops-private-vpc","dopt-b1e813ca","***","domain-name","ec2.internal","Name=default"
+"devops-private-vpc","dopt-b1e813ca","***","domain-name-servers","AmazonProvidedDNS","Name=default"
+"devops-public-vpc","dopt-b1e813ca","***","domain-name","ec2.internal","Name=default"
+"devops-public-vpc","dopt-b1e813ca","***","domain-name-servers","AmazonProvidedDNS","Name=default"

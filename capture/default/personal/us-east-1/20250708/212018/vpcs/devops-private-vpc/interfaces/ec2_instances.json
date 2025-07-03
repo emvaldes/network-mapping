@@ -1,0 +1,46 @@
+[
+  {
+    "Attachment": {
+      "AttachTime": "2025-07-09T04:12:15+00:00",
+      "AttachmentId": "eni-attach-0b2779cf4a85b8dbf",
+      "DeleteOnTermination": true,
+      "DeviceIndex": 0,
+      "NetworkCardIndex": 0,
+      "InstanceId": "i-07dd74937c817548b",
+      "InstanceOwnerId": "***",
+      "Status": "attached"
+    },
+    "AvailabilityZone": "us-east-1a",
+    "Description": "",
+    "Groups": [
+      {
+        "GroupId": "sg-06a55a043c365a161",
+        "GroupName": "network-mapping-EC2PrivateInstanceSecurityGroup-npruG2C3gq4Z"
+      }
+    ],
+    "InterfaceType": "interface",
+    "Ipv6Addresses": [],
+    "MacAddress": "02:6a:f8:e6:4f:fb",
+    "NetworkInterfaceId": "eni-0c8b54225a4b22f49",
+    "OwnerId": "***",
+    "PrivateDnsName": "ip-10-1-1-106.ec2.internal",
+    "PublicDnsName": "",
+    "PrivateIpAddress": "10.1.1.106",
+    "PrivateIpAddresses": [
+      {
+        "Primary": true,
+        "PrivateDnsName": "ip-10-1-1-106.ec2.internal",
+        "PrivateIpAddress": "10.1.1.106"
+      }
+    ],
+    "RequesterManaged": false,
+    "SourceDestCheck": true,
+    "Status": "in-use",
+    "SubnetId": "subnet-0ebc71f9acbeba83c",
+    "TagSet": [],
+    "VpcId": "vpc-0dd98b0cb5d3ded56",
+    "Operator": {
+      "Managed": false
+    }
+  }
+]

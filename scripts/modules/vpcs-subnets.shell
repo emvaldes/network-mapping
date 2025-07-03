@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+
+#------------------------------------------------------------------------------#
+# default_vpc
+#
+# Queries the default VPC in the region and saves its metadata to a file.
+# Output File:
+#   - default_vpc.json
+#------------------------------------------------------------------------------#
+
+function default_vpc () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+
+    aws ec2 describe-vpcs \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=isDefault,Values=true" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias default-vpc='default_vpc';
+
+#------------------------------------------------------------------------------#
+# vpc_metadata
+#
+# Queries metadata for a specific VPC (by VPC ID) and saves it to a file.
+# Parameters:
+#   - VPC ID
+# Output File:
+#   - vpc.json
+#------------------------------------------------------------------------------#
+
+function vpc_metadata () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-vpcs \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --vpc-ids "${vpc_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-metadata='vpc_metadata';
+
+#------------------------------------------------------------------------------#
+# vpc_peering_connections
+#
+# Queries all VPC Peering Connections in the account/region and saves them to a file.
+# Output File:
+#   - vpc_peering_connections.json
+#------------------------------------------------------------------------------#
+
+function vpc_peering_connections () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    # [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+    # --query "VpcPeeringConnections[?
+    #            RequesterVpcInfo.VpcId=='${vpc_id}' ||
+    #            AccepterVpcInfo.VpcId=='${vpc_id}'
+    #         ]" \
+
+    aws ec2 describe-vpc-peering-connections \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-peering-connections='vpc_peering_connections';
+
+#------------------------------------------------------------------------------#
+# vpc_endpoints
+#
+# Queries all VPC Endpoints for a given VPC and saves them to a file.
+# Parameters:
+#   - VPC ID
+# Output File:
+#   - vpc_endpoints.json
+#------------------------------------------------------------------------------#
+
+function vpc_endpoints () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-vpc-endpoints \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=vpc-id,Values=${vpc_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-endpoints='vpc_endpoints';
+
+#------------------------------------------------------------------------------#
+# vpc_endpoint_connections
+#
+# Iterates over VPC Endpoints (interface type) and queries each endpoint's connection state.
+# Parameters:
+#   - Output folder path (where per-endpoint connection JSON files will be saved).
+#   - VPC Endpoints JSON file.
+# Output Files:
+#   - endpoint_connection_<service>.json (one per interface endpoint).
+#------------------------------------------------------------------------------#
+
+function vpc_endpoint_connections () {
+
+    [[ -n ${1:-} ]] && local output_file_base="${1}" || return 1;
+    [[ -n ${2:-} ]] && local endpoints_file="${2}" || return 1;
+
+    jq -c '.VpcEndpoints[] | select(.VpcEndpointType == "Interface")' \
+    "${endpoints_file}" | \
+    while read -r ep; do
+
+        local svc_name="$(
+          jq -r '.ServiceName' <<< "${ep}" | \
+          awk -F. '{print $(NF)}'
+        )";
+
+        local vpce_id="$(
+          jq -r '.VpcEndpointId' <<< "${ep}"
+        )";
+
+        aws ec2 describe-vpc-endpoint-connections \
+            --profile "${target_profile}" \
+            --region "${target_region}" \
+            --filters "Name=vpc-endpoint-id,Values=${vpce_id}" \
+            --output "${output_format}" \
+        > "${output_file_base}/endpoint_connection_${svc_name}.json";
+
+    done;
+
+    return 0;
+}; alias vpc-endpoint-connections='vpc_endpoint_connections';
+
+#------------------------------------------------------------------------------#
+# vpc_dhcp_options
+#
+# Queries DHCP Options Set metadata for the VPC and saves it to a file.
+# Parameters:
+#   - VPC metadata JSON file (to extract DhcpOptionsId).
+# Output File:
+#   - dhcp_options.json
+#------------------------------------------------------------------------------#
+
+function vpc_dhcp_options () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_file="${2}" || return 1;
+
+    local dhcp_id;
+    dhcp_id="$(
+      jq -r '.Vpcs[0].DhcpOptionsId' "${vpc_file}"
+    )";
+
+    aws ec2 describe-dhcp-options \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --dhcp-options-ids "${dhcp_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-dhcp-options='vpc_dhcp_options';
+
+#------------------------------------------------------------------------------
+# Retrieves subnet details filtered by the subnet's Name tag.
+# Captures the result in a caller-defined variable.
+#
+# Parameters:
+# - 1: output variable name to assign the result to
+# - 2: subnet name (tag:Name)
+# - 3: AWS CLI profile
+# - 4: AWS region
+# - 5: output format (optional, defaults to 'json')
+#
+# Always queries the AWS EC2 service.
+#------------------------------------------------------------------------------
+
+function vpc_subnet_details () {
+
+    [[ -n ${1:-} ]] && local output_variable="${1}" || return 1;
+    [[ -n ${2:-} ]] && local subnet_name="${2}" || return 1;
+
+    local subnet_details="$(
+      aws ec2 describe-subnets \
+          --profile "${target_profile}" \
+          --region "${target_region}" \
+          --filters "Name=tag:Name,Values=${subnet_name}" \
+          --query 'Subnets[*]' \
+          --output "${output_format}"
+    )";
+
+    printf -v "${output_variable}" '%s' "${subnet_details}";
+
+    return 0;
+}; alias vpc-subnet-details='vpc_subnet_details';
+
+#------------------------------------------------------------------------------
+# Extracts metadata from a single subnet JSON object and prepares the output folder.
+#
+# Actions:
+# - Extracts the Subnet ID and VPC ID from the provided subnet JSON.
+# - Creates an output folder named after the subnet name (if present) or the subnet ID.
+# - Saves the raw subnet JSON to the output folder as "subnet.json".
+#
+# Parameters:
+# - 1: output variable name to assign the extracted Subnet ID
+# - 2: output variable name to assign the extracted VPC ID
+# - 3: base output directory path
+# - 4: subnet name (optional; if empty, Subnet ID is used for the folder name)
+# - 5: subnet JSON object (string)
+#------------------------------------------------------------------------------
+
+function vpc_subnet_metadata () {
+
+    [[ -n ${1:-} ]] && local variable__subnet_id="${1}" || return 1;
+    [[ -n ${2:-} ]] && local output_directory="${2}" || return 1;
+    [[ -n ${3:-} ]] && local subnet_json="${3}" || return 1;
+
+    [[ -n ${4:-} ]] && local subnet_name="${4}" || local subnet_name='';
+
+    local subnet__id="$(
+      jq -r '.SubnetId' <<< "${subnet_json}"
+    )";
+
+    local subnet_directory="${output_directory}/subnets";
+    if [[ -n "${subnet_name}" ]]; then
+            subnet_directory+="/${subnet_name}";
+      else  subnet_directory+="/${subnet__id}";
+    fi;
+
+    mkdir -p "${subnet_directory}";
+    jq <<< "${subnet_json}" > "${subnet_directory}/subnet.json";
+
+    printf -v "${variable__subnet_id}" '%s' "${subnet__id}";
+
+    return 0;
+}; alias vpc-subnet-metadata='vpc_subnet_metadata';

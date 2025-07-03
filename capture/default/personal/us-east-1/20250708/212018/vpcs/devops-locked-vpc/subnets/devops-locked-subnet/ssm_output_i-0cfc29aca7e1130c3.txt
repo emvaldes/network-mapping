@@ -1,0 +1,12 @@
+root
+Linux ip-10-2-1-191.ec2.internal 4.14.238-182.422.amzn2.x86_64 #1 SMP Tue Jul 20 20:35:54 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+NAME="Amazon Linux"
+VERSION="2"
+ID="amzn"
+ID_LIKE="centos rhel fedora"
+VERSION_ID="2"
+PRETTY_NAME="Amazon Linux 2"
+ANSI_COLOR="0;33"
+CPE_NAME="cpe:2.3:o:amazon:amazon_linux:2"
+HOME_URL="https://amazonlinux.com/"
+

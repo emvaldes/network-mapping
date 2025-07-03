@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+
+#------------------------------------------------------------------------------
+# transit_gateways
+#
+# Queries all Transit Gateways in the target AWS region/account.
+# Output File:
+#   - transit_gateways.json
+#------------------------------------------------------------------------------
+
+function transit_gateways () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+
+    aws ec2 describe-transit-gateways \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias transit-gateways='transit_gateways';
+
+#------------------------------------------------------------------------------
+# tgw_route_tables
+#
+# Queries all Transit Gateway Route Tables in the target AWS region/account.
+# Extracts key metadata such as IDs, states, defaults, and tags.
+# Output File:
+#   - tgw_route_tables.json
+#------------------------------------------------------------------------------
+
+function tgw_route_tables () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+
+    aws ec2 describe-transit-gateway-route-tables \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --query 'TransitGatewayRouteTables[].{
+                  TransitGatewayRouteTableId: TransitGatewayRouteTableId,
+                  TransitGatewayId: TransitGatewayId,
+                  State: State,
+                  DefaultAssociationRouteTable: DefaultAssociationRouteTable,
+                  DefaultPropagationRouteTable: DefaultPropagationRouteTable,
+                  CreationTime: CreationTime,
+                  Tags: Tags
+                }' \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias tgw-route-tables='tgw_route_tables';
+
+#------------------------------------------------------------------------------
+# tgw_route_tables_associations
+#
+# Queries the route table associations for a given Transit Gateway Route Table.
+# Parameters:
+#   - 1: Output file path
+#   - 2: Transit Gateway Route Table ID
+# Output File:
+#   - <RouteTableId>--associated.json
+#------------------------------------------------------------------------------
+
+function tgw_route_tables_associations () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local tgw_rtbl_id="${2}" || return 1;
+
+    aws ec2 get-transit-gateway-route-table-associations \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --transit-gateway-route-table-id "${tgw_rtbl_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias tgw-route-tables-associations='tgw_route_tables_associations';
+
+#------------------------------------------------------------------------------
+# tgw_route_tables_propagations
+#
+# Queries the route table propagations for a given Transit Gateway Route Table.
+# Parameters:
+#   - 1: Output file path
+#   - 2: Transit Gateway Route Table ID
+# Output File:
+#   - <RouteTableId>--propagated.json
+#------------------------------------------------------------------------------
+
+function tgw_route_tables_propagations () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local tgw_rtbl_id="${2}" || return 1;
+
+    aws ec2 get-transit-gateway-route-table-propagations \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --transit-gateway-route-table-id "${tgw_rtbl_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias tgw-route-tables-propagations='tgw_route_tables_propagations';
+
+#------------------------------------------------------------------------------
+# tgw_route_tables_advertised
+#
+# Queries all active routes advertised by a given Transit Gateway Route Table.
+# Parameters:
+#   - 1: Output file path
+#   - 2: Transit Gateway Route Table ID
+# Output File:
+#   - <RouteTableId>--advertised.json
+#------------------------------------------------------------------------------
+
+function tgw_route_tables_advertised () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local tgw_rtbl_id="${2}" || return 1;
+
+    aws ec2 search-transit-gateway-routes \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --transit-gateway-route-table-id "${tgw_rtbl_id}" \
+        --filters Name=state,Values=active \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias tgw-route-tables-advertised='tgw_route_tables_advertised';
+
+#------------------------------------------------------------------------------
+# tgw_configurations
+#
+# Runs all Transit Gateway discovery steps in sequence:
+#   - Transit Gateways
+#   - Transit Gateway Route Tables
+#   - Route Table Associations
+#   - Route Table Propagations
+#   - Active Routes (Advertised)
+#
+# Parameters:
+#   - 1: Output file path for Transit Gateways (transit_gateways.json)
+#   - 2: Output file path for Route Tables (tgw_route_tables.json)
+#
+# Output:
+#   - Saves additional association, propagation, and advertised route data
+#     to individual files named after each Route Table ID.
+#------------------------------------------------------------------------------
+
+function tgw_configurations () {
+
+    [[ -n ${1:-} ]] && local tgw_output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local tgw_rtbls_file="${2}" || return 1;
+
+    local output_folder="$(
+      dirname "${tgw_output_file}"
+    )";
+
+    transit_gateways "${tgw_output_file}" \
+                     "${output_format}";
+
+    tgw_route_tables "${tgw_rtbls_file}" \
+                     "${output_format}";
+
+    # local tgw_route_table_ids;
+    # mapfile -t tgw_route_table_ids < <(
+    #   jq -r '.[].TransitGatewayRouteTableId' \
+    #   "${tgw_rtbls_file}"
+    # );
+    #
+    # for tgw_rt_id in "${tgw_route_table_ids[@]}"; do
+    #
+    #   tgw_route_tables_associations \
+    #     "${output_folder}/${tgw_rt_id}--associated.json" \
+    #     "${tgw_rt_id}";
+    #
+    #   tgw_route_tables_propagations \
+    #     "${output_folder}/${tgw_rt_id}--propagated.json" \
+    #     "${tgw_rt_id}";
+    #
+    #   tgw_route_tables_advertised \
+    #       "${output_folder}/${tgw_rt_id}--advertised.json" \
+    #       "${tgw_rt_id}";
+    #
+    # done;
+
+    return 0;
+}; alias tgw-configurations='tgw_configurations';
+
+#------------------------------------------------------------------------------
+# vpc_tgw_attachments
+#
+# Queries all Transit Gateway attachments for a given VPC.
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+# Output File:
+#   - tgw_attachments.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function vpc_tgw_attachments () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-transit-gateway-attachments \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=resource-id,Values=${vpc_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+
+}; alias vpc-tgw-attachments='vpc_tgw_attachments';

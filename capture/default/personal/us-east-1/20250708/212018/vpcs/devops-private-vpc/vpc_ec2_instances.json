@@ -1,0 +1,33 @@
+[
+    {
+        "InstanceId": "i-07dd74937c817548b",
+        "State": "running",
+        "SubnetId": "subnet-0ebc71f9acbeba83c",
+        "VpcId": "vpc-0dd98b0cb5d3ded56",
+        "PrivateIpAddress": "10.1.1.106",
+        "PublicIpAddress": null,
+        "IamRole": "arn:aws:iam::***:instance-profile/network-mapping-SSMInstanceProfile-mcP8cbDL9bZW",
+        "Tags": [
+            {
+                "Key": "Name",
+                "Value": "DevOps-EC2-Private"
+            },
+            {
+                "Key": "aws:cloudformation:stack-id",
+                "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+            },
+            {
+                "Key": "DevOps",
+                "Value": "true"
+            },
+            {
+                "Key": "aws:cloudformation:logical-id",
+                "Value": "EC2PrivateInstance"
+            },
+            {
+                "Key": "aws:cloudformation:stack-name",
+                "Value": "network-mapping"
+            }
+        ]
+    }
+]

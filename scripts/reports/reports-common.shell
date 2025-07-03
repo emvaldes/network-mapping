@@ -1,0 +1,1647 @@
+#!/usr/bin/env bash
+## File: /usr/local/bin/network-mapping/modules/reports-common.shell
+
+#------------------------------------------------------------------------------#
+# Common reporting module for shared and VPC-specific reports
+# - Defines environment variables
+# - Manages temporary workspace
+# - Should be sourced by report scripts, not executed directly
+#------------------------------------------------------------------------------#
+
+set -euo pipefail;
+## set -x;
+
+export LC_ALL=C;
+
+export TMP_DIR="$( mktemp -d )";
+trap '[[ -d "${TMP_DIR}" ]] && rm -rf "${TMP_DIR}"' EXIT;
+
+#------------------------------------------------------------------------------#
+# Locate the latest reports folder
+#------------------------------------------------------------------------------#
+
+[[ -n ${1:-} ]] && latest_folder="${1}" || {
+  echo -e "ERROR: Missing base capture folder path";
+  exit 1;
+};
+
+shared_folder="${latest_folder}/shared";
+exports_folder="exports/${latest_folder}";
+
+mkdir -p "${exports_folder}";
+
+echo -e "Using shared folder: ${shared_folder}";
+echo -e "Exporting CSV files to: ${exports_folder}";
+echo -e;
+
+#------------------------------------------------------------------------------#
+# Report: Network Interfaces - CSV Output
+# Processes ec2_instances.json under each VPC's interfaces/ folder
+# Extracts:
+# - NetworkInterfaceId, PrivateIpAddress, PublicIp, SubnetId, VpcId, Status, Description, InterfaceType
+#------------------------------------------------------------------------------#
+
+function report_interfaces_ec2_instances () {
+
+    local output_file="${exports_folder}/interfaces_ec2_instances.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      NetworkInterfaceId
+      PrivateIpAddress
+      PublicIp
+      SubnetId
+      VpcId
+      Status
+      Description
+      InterfaceType
+    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/interfaces/ec2_instances.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+        .[] |
+        [
+            $vpc,
+            (.NetworkInterfaceId // "-"),
+            (.PrivateIpAddress // "-"),
+            (.Association.PublicIp // "-"),
+            (.SubnetId // "-"),
+            (.VpcId // "-"),
+            (.Status // "-"),
+            (.Description // "-"),
+            (.InterfaceType // "-")
+        ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-interfaces-ec2-instances='report_interfaces_ec2_instances';
+
+#------------------------------------------------------------------------------#
+# Report: Interfaces - Transit Gateway ENI Attachments - CSV Output
+# Processes each transit_gateway_attachments.json file under vpcs/*/interfaces/
+# Each file contains a list of network interfaces (ENIs) representing TGW attachments.
+# Extracts:
+# - NetworkInterfaceId, AttachmentId, Status, SubnetId, VpcId,
+#   PrivateIpAddress, InterfaceType
+#
+# CSV Columns:
+# - VPC
+# - NetworkInterfaceId
+# - AttachmentId
+# - Status
+# - SubnetId
+# - VpcId
+# - PrivateIpAddress
+# - InterfaceType
+#------------------------------------------------------------------------------#
+
+function report_interfaces_transit_gateway_attachments () {
+
+    local output_file="${exports_folder}/interfaces_transit_gateway_attachments.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      NetworkInterfaceId
+      AttachmentId
+      Status
+      SubnetId
+      VpcId
+      PrivateIpAddress
+      InterfaceType
+    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$(basename "${vpc_path}")";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/interfaces/transit_gateway_attachments.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+        .[]? |
+        [
+            $vpc,
+            (.NetworkInterfaceId // "-"),
+            (.Attachment.AttachmentId // "-"),
+            (.Status // "-"),
+            (.SubnetId // "-"),
+            (.VpcId // "-"),
+            (.PrivateIpAddress // "-"),
+            (.InterfaceType // "-")
+        ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-interfaces-transit-gateway-attachments='report_interfaces_transit_gateway_attachments';
+
+#------------------------------------------------------------------------------#
+# Report: Interfaces - VPC Endpoint Interfaces - CSV Output
+# Processes each vpc_endpoints.json file under vpcs/*/interfaces/
+# Each file contains a list of network interfaces (ENIs) representing VPC endpoints.
+# Extracts:
+# - NetworkInterfaceId, AttachmentId, Description, Status, SubnetId, VpcId,
+#   PrivateIpAddress, InterfaceType
+#
+# CSV Columns:
+# - VPC
+# - NetworkInterfaceId
+# - AttachmentId
+# - Description
+# - Status
+# - SubnetId
+# - VpcId
+# - PrivateIpAddress
+# - InterfaceType
+#------------------------------------------------------------------------------#
+
+function report_interfaces_vpc_endpoints () {
+
+    local output_file="${exports_folder}/interfaces_vpc_endpoints.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      NetworkInterfaceId
+      AttachmentId
+      Description
+      Status
+      SubnetId
+      VpcId
+      PrivateIpAddress
+      InterfaceType
+    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$(basename "${vpc_path}")";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/interfaces/vpc_endpoints.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+        .[]? |
+        [
+            $vpc,
+            (.NetworkInterfaceId // "-"),
+            (.Attachment.AttachmentId // "-"),
+            (.Description // "-"),
+            (.Status // "-"),
+            (.SubnetId // "-"),
+            (.VpcId // "-"),
+            (.PrivateIpAddress // "-"),
+            (.InterfaceType // "-")
+        ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-interfaces-vpc-endpoints='report_interfaces_vpc_endpoints';
+
+#------------------------------------------------------------------------------#
+# Report: Interfaces - NAT Gateway Interfaces - CSV Output
+# Processes each nat_gateways.json file under vpcs/*/interfaces/
+# Each file contains a list of network interfaces (ENIs) representing NAT gateways.
+# Extracts:
+# - NetworkInterfaceId, AttachmentId, Description, Status, SubnetId, VpcId,
+#   PrivateIpAddress, PublicIp, InterfaceType
+#
+# CSV Columns:
+# - VPC
+# - NetworkInterfaceId
+# - AttachmentId
+# - Description
+# - Status
+# - SubnetId
+# - VpcId
+# - PrivateIpAddress
+# - PublicIp
+# - InterfaceType
+#------------------------------------------------------------------------------#
+
+function report_interfaces_nat_gateways () {
+
+    local output_file="${exports_folder}/interfaces_nat_gateways.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      NetworkInterfaceId
+      AttachmentId
+      Description
+      Status
+      SubnetId
+      VpcId
+      PrivateIpAddress
+      PublicIp
+      InterfaceType
+    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$(basename "${vpc_path}")";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/interfaces/nat_gateways.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+        .[]? |
+        [
+            $vpc,
+            (.NetworkInterfaceId // "-"),
+            (.Attachment.AttachmentId // "-"),
+            (.Description // "-"),
+            (.Status // "-"),
+            (.SubnetId // "-"),
+            (.VpcId // "-"),
+            (.PrivateIpAddress // "-"),
+            (.Association.PublicIp // "-"),
+            (.InterfaceType // "-")
+        ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-interfaces-nat-gateways='report_interfaces_nat_gateways';
+
+#------------------------------------------------------------------------------#
+# Report: Subnets - Default Route Tables - CSV Output
+# Processes each default_route_tables.json file under vpcs/*/subnets/*/
+# Each file contains a list of default routes for the subnet.
+# Extracts:
+# - DestinationCidrBlock, GatewayId, Origin, State
+#
+# CSV Columns:
+# - VPC
+# - Subnet
+# - DestinationCidrBlock
+# - GatewayId
+# - Origin
+# - State
+#------------------------------------------------------------------------------#
+
+function report_subnets_default_route_tables () {
+
+    local output_file="${exports_folder}/subnets_default_route_tables.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      Subnet
+      DestinationCidrBlock
+      GatewayId
+      Origin
+      State
+    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      for subnet_path in "${latest_folder}/vpcs/${vpc_folder}/subnets"/*/; do
+        local subnet_folder;
+        subnet_folder="$( basename "${subnet_path}" )";
+
+        local target_file="${subnet_path}/default_route_tables.json";
+        if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+        fi;
+
+        jq -r --arg vpc "${vpc_folder}" --arg subnet "${subnet_folder}" '
+          .[]? |
+          [
+              $vpc,
+              $subnet,
+              (.DestinationCidrBlock // "-"),
+              (.GatewayId // "-"),
+              (.Origin // "-"),
+              (.State // "-")
+          ] | @csv
+        ' "${target_file}" | tee -a "${output_file}";
+      done;
+    done;
+
+    return 0;
+}; alias report-subnets-default-route-tables='report_subnets_default_route_tables';
+
+#------------------------------------------------------------------------------#
+# Report: Subnets - EC2 Instances - CSV Output
+# Processes each ec2_instances.json file under vpcs/*/subnets/*/
+# Each file contains a list of EC2 instances for the subnet.
+# Extracts:
+# - InstanceId, State, SubnetId, VpcId, PrivateIpAddress, PublicIpAddress,
+#   IamRole, SSM PingStatus, PlatformName, Name tag, DevOps tag
+#
+# CSV Columns:
+# - VPC
+# - Subnet
+# - InstanceId
+# - State
+# - SubnetId
+# - VpcId
+# - PrivateIpAddress
+# - PublicIpAddress
+# - IamRole
+# - SsmPingStatus
+# - PlatformName
+# - Name
+# - DevOps
+#------------------------------------------------------------------------------#
+
+function report_subnets_ec2_instances () {
+
+    local output_file="${exports_folder}/subnets_ec2_instances.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      Subnet
+      InstanceId
+      State
+      SubnetId
+      VpcId
+      PrivateIpAddress
+      PublicIpAddress
+      IamRole
+      SsmPingStatus
+      PlatformName
+      Name
+      DevOps
+    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$(basename "${vpc_path}")";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      for subnet_path in "${latest_folder}/vpcs/${vpc_folder}/subnets"/*/; do
+        local subnet_folder;
+        subnet_folder="$(basename "${subnet_path}")";
+
+        local target_file="${subnet_path}/ec2_instances.json";
+        if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+        fi;
+
+        jq -r --arg vpc "${vpc_folder}" --arg subnet "${subnet_folder}" '
+          .[]? |
+          [
+              $vpc,
+              $subnet,
+              (.InstanceId // "-"),
+              (.State // "-"),
+              (.SubnetId // "-"),
+              (.VpcId // "-"),
+              (.PrivateIpAddress // "-"),
+              (.PublicIpAddress // "-"),
+              (.IamRole // "-"),
+              (.SSM.PingStatus // "-"),
+              (.SSM.PlatformName // "-"),
+              (.Tags[]? | select(.Key == "Name") | .Value) // "-",
+              (.Tags[]? | select(.Key == "DevOps") | .Value) // "-"
+          ] | @csv
+        ' "${target_file}" | tee -a "${output_file}";
+      done;
+    done;
+
+    return 0;
+}; alias report-subnets-ec2-instances='report_subnets_ec2_instances';
+
+#------------------------------------------------------------------------------#
+# Report: Subnets - Subnet Route Tables - CSV Output
+# Processes each subnet_route_tables.json file under vpcs/*/subnets/*/
+# Each file contains a RouteTables array with Routes and Associations.
+# Extracts for each Route:
+# - RouteTableId, DestinationCidrBlock, GatewayId, VpcPeeringConnectionId,
+#   Origin, State, AssociatedSubnetId, RouteTable Name tag, DevOps tag
+#
+# CSV Columns:
+# - VPC
+# - Subnet
+# - RouteTableId
+# - DestinationCidrBlock
+# - GatewayId
+# - VpcPeeringConnectionId
+# - Origin
+# - State
+# - AssociatedSubnetId
+# - Name
+# - DevOps
+#------------------------------------------------------------------------------#
+
+function report_subnets_subnet_route_tables () {
+
+    local output_file="${exports_folder}/subnets_subnet_route_tables.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      Subnet
+      RouteTableId
+      DestinationCidrBlock
+      GatewayId
+      VpcPeeringConnectionId
+      Origin
+      State
+      AssociatedSubnetId
+      Name
+      DevOps
+    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$(basename "${vpc_path}")";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      for subnet_path in "${latest_folder}/vpcs/${vpc_folder}/subnets"/*/; do
+        local subnet_folder;
+        subnet_folder="$(basename "${subnet_path}")";
+
+        local target_file="${subnet_path}/subnet_route_tables.json";
+        if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+        fi;
+
+        jq -r --arg vpc "${vpc_folder}" --arg subnet "${subnet_folder}" '
+          .RouteTables[]? as $rtb |
+          $rtb.Routes[]? as $route |
+          [
+              $vpc,
+              $subnet,
+              ($rtb.RouteTableId // "-"),
+              ($route.DestinationCidrBlock // "-"),
+              ($route.GatewayId // "-"),
+              ($route.VpcPeeringConnectionId // "-"),
+              ($route.Origin // "-"),
+              ($route.State // "-"),
+              ($rtb.Associations[]? | select(.SubnetId != null) | .SubnetId) // "-",
+              ($rtb.Tags[]? | select(.Key == "Name") | .Value) // "-",
+              ($rtb.Tags[]? | select(.Key == "DevOps") | .Value) // "-"
+          ] | @csv
+        ' "${target_file}" | tee -a "${output_file}";
+      done;
+    done;
+
+    return 0;
+}; alias report-subnets-subnet-route-tables='report_subnets_subnet_route_tables';
+
+#------------------------------------------------------------------------------#
+# Report: Subnets - Subnet Metadata - CSV Output
+# Processes each subnet.json file under vpcs/*/subnets/*/
+# Each file contains metadata describing a single subnet.
+# Extracts:
+# - SubnetId, VpcId, CidrBlock, AvailabilityZone, AvailableIpAddressCount,
+#   MapPublicIpOnLaunch, DefaultForAz, State, Name tag, DevOps tag
+#
+# CSV Columns:
+# - VPC
+# - Subnet
+# - SubnetId
+# - VpcId
+# - CidrBlock
+# - AvailabilityZone
+# - AvailableIpAddressCount
+# - MapPublicIpOnLaunch
+# - DefaultForAz
+# - State
+# - Name
+# - DevOps
+#------------------------------------------------------------------------------#
+
+function report_subnets_metadata () {
+
+    local output_file="${exports_folder}/subnets_metadata.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      Subnet
+      SubnetId
+      VpcId
+      CidrBlock
+      AvailabilityZone
+      AvailableIpAddressCount
+      MapPublicIpOnLaunch
+      DefaultForAz
+      State
+      Name
+      DevOps
+    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$(basename "${vpc_path}")";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      for subnet_path in "${latest_folder}/vpcs/${vpc_folder}/subnets"/*/; do
+        local subnet_folder;
+        subnet_folder="$(basename "${subnet_path}")";
+
+        local target_file="${subnet_path}/subnet.json";
+        if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+        fi;
+
+        jq -r --arg vpc "${vpc_folder}" --arg subnet "${subnet_folder}" '
+          [
+              $vpc,
+              $subnet,
+              (.SubnetId // "-"),
+              (.VpcId // "-"),
+              (.CidrBlock // "-"),
+              (.AvailabilityZone // "-"),
+              (.AvailableIpAddressCount // "-"),
+              (.MapPublicIpOnLaunch | tostring // "-"),
+              (.DefaultForAz | tostring // "-"),
+              (.State // "-"),
+              (.Tags[]? | select(.Key == "Name") | .Value) // "-",
+              (.Tags[]? | select(.Key == "DevOps") | .Value) // "-"
+          ] | @csv
+        ' "${target_file}" | tee -a "${output_file}";
+      done;
+    done;
+
+    return 0;
+}; alias report-subnets-metadata='report_subnets_metadata';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: DHCP Options across all VPCs
+# Scans all folders in ${latest_folder}, excluding "shared" and "exports"
+# Processes each vpc-*/dhcp-options.json file
+# Aggregates into a single CSV:
+# - VPC, DhcpOptionsId, OwnerId, Key, Values, Tags
+#
+# Output: dhcp_options_all_vpcs.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_dhcp_options () {
+
+    local output_file="${exports_folder}/vpcs_dhcp_options.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      DhcpOptionsId
+      OwnerId
+      Key
+      Values
+      Tags
+    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/dhcp_options.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .DhcpOptions[]? as $opt |
+          ($opt.DhcpConfigurations[]? // {}) as $config |
+          [
+              $vpc,
+              ($opt.DhcpOptionsId // "-"),
+              ($opt.OwnerId // "-"),
+              ($config.Key // "-"),
+              (
+                  ($config.Values // [])
+                  | map(.Value // "-")
+                  | join(",")
+              ),
+              (
+                  ($opt.Tags // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs_dhcp-options='report_vpcs_dhcp_options';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: Internet Gateways across all VPCs
+# Scans all folders in ${latest_folder}, excluding "shared" and "exports"
+# Processes each vpc-*/igw.json file
+# Aggregates into a single CSV:
+# - VPC, InternetGatewayId, OwnerId, AttachmentVpcId, AttachmentState, Tags
+#
+# Output: igw_all_vpcs.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_igws () {
+
+    local output_file="${exports_folder}/vpcs_igws.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      InternetGatewayId
+      OwnerId
+      AttachmentVpcId
+      AttachmentState
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/igw.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .InternetGateways[]? as $igw |
+          ($igw.Attachments[]? // {}) as $attach |
+          [
+              $vpc,
+              ($igw.InternetGatewayId // "-"),
+              ($igw.OwnerId // "-"),
+              ($attach.VpcId // "-"),
+              ($attach.State // "-"),
+              (
+                  ($igw.Tags // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-igws='report_vpcs_igws';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: Network ACLs across all VPCs
+# Scans all folders in ${latest_folder}, excluding "shared" and "exports"
+# Processes each vpc-*/network_acls.json file
+# Aggregates into a single CSV:
+# - VPC, NetworkAclId, VpcId, OwnerId, IsDefault,
+#   AssociationId, AssociatedSubnetId,
+#   RuleNumber, Protocol, RuleAction, Egress, CidrBlock
+#
+# Output: vpcs_network_acls.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_network_acls () {
+
+    local output_file="${exports_folder}/vpcs_network_acls.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      NetworkAclId
+      VpcId
+      OwnerId
+      IsDefault
+      AssociationId
+      AssociatedSubnetId
+      RuleNumber
+      Protocol
+      RuleAction
+      Egress
+      CidrBlock
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/network_acls.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .NetworkAcls[]? as $acl |
+          ($acl.Associations[]? // [{}]) as $assoc |
+          ($acl.Entries[]? // [{}]) as $entry |
+          [
+              $vpc,
+              ($acl.NetworkAclId // "-"),
+              ($acl.VpcId // "-"),
+              ($acl.OwnerId // "-"),
+              ($acl.IsDefault | tostring // "-"),
+              ($assoc.NetworkAclAssociationId // "-"),
+              ($assoc.SubnetId // "-"),
+              ($entry.RuleNumber | tostring // "-"),
+              ($entry.Protocol // "-"),
+              ($entry.RuleAction // "-"),
+              ($entry.Egress | tostring // "-"),
+              ($entry.CidrBlock // "-")
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-network-acls='report_vpcs_network_acls';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: Network Interfaces across all VPCs
+# Scans all folders in ${latest_folder}, excluding "shared" and "exports"
+# Processes each vpc-*/network_interfaces.json file
+# Aggregates into a single CSV:
+# - VPC, NetworkInterfaceId, SubnetId, VpcId, InterfaceType, Status,
+#   PrivateIpAddress, PublicIp, MacAddress, Description, OwnerId,
+#   AttachmentId, InstanceId, DeviceIndex,
+#   SecurityGroups (group-id=group-name;...), Tags (key=value;...)
+#
+# Output: vpcs_network_interfaces.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_network_interfaces () {
+
+    local output_file="${exports_folder}/vpcs_network_interfaces.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      NetworkInterfaceId
+      SubnetId
+      VpcId
+      InterfaceType
+      Status
+      PrivateIpAddress
+      PublicIp
+      MacAddress
+      Description
+      OwnerId
+      AttachmentId
+      InstanceId
+      DeviceIndex
+      SecurityGroups
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/network_interfaces.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .NetworkInterfaces[]? as $eni |
+          [
+              $vpc,
+              ($eni.NetworkInterfaceId // "-"),
+              ($eni.SubnetId // "-"),
+              ($eni.VpcId // "-"),
+              ($eni.InterfaceType // "-"),
+              ($eni.Status // "-"),
+              ($eni.PrivateIpAddress // "-"),
+              ($eni.Association.PublicIp // "-"),
+              ($eni.MacAddress // "-"),
+              ($eni.Description // "-"),
+              ($eni.OwnerId // "-"),
+              ($eni.Attachment.AttachmentId // "-"),
+              ($eni.Attachment.InstanceId // "-"),
+              ($eni.Attachment.DeviceIndex | tostring // "-"),
+              (
+                  ($eni.Groups // [])
+                  | map("\(.GroupId)=\(.GroupName)")
+                  | join(";")
+              ),
+              (
+                  ($eni.TagSet // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-network-interfaces='report_vpcs_network_interfaces';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: Unattached Security Groups across all VPCs
+# Scans all folders in ${latest_folder}, excluding "shared" and "exports"
+# Processes each vpc-*/security_groups_unattached.json file
+# Aggregates into a single CSV:
+# - VPC, GroupId, GroupName, Description, VpcId, OwnerId, SecurityGroupArn,
+#   IngressProtocols, EgressProtocols
+#
+# Output: vpcs_security_groups_unattached.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_security_groups_unattached () {
+
+    local output_file="${exports_folder}/vpcs_security_groups_unattached.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      GroupId
+      GroupName
+      Description
+      VpcId
+      OwnerId
+      SecurityGroupArn
+      IngressProtocols
+      EgressProtocols
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/security_groups_unattached.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .[]? as $sg |
+          [
+              $vpc,
+              ($sg.GroupId // "-"),
+              ($sg.GroupName // "-"),
+              ($sg.Description // "-"),
+              ($sg.VpcId // "-"),
+              ($sg.OwnerId // "-"),
+              ($sg.SecurityGroupArn // "-"),
+              (
+                  ($sg.IpPermissions // []) | map(.IpProtocol // "-") | unique | join(",")
+              ),
+              (
+                  ($sg.IpPermissionsEgress // []) | map(.IpProtocol // "-") | unique | join(",")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-security-groups-unattached='report_vpcs_security_groups_unattached';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: Security Groups across all VPCs
+# Processes each vpc-*/security_groups.json file
+# Aggregates into a single CSV:
+# - VPC, GroupId, GroupName, Description, VpcId, OwnerId, SecurityGroupArn,
+#   IngressRules, EgressRules, Tags
+#
+# Output: vpcs_security_groups.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_security_groups () {
+
+    local output_file="${exports_folder}/vpcs_security_groups.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      GroupId
+      GroupName
+      Description
+      VpcId
+      OwnerId
+      SecurityGroupArn
+      IngressRules
+      EgressRules
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/security_groups.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+        .SecurityGroups[]? as $sg |
+        [
+          $vpc,
+          ($sg.GroupId // "-"),
+          ($sg.GroupName // "-"),
+          ($sg.Description // "-"),
+          ($sg.VpcId // "-"),
+          ($sg.OwnerId // "-"),
+          ($sg.SecurityGroupArn // "-"),
+          # Ingress rules
+          (
+            ($sg.IpPermissions // []) | map(
+              (
+                (.IpProtocol // "-")
+                + ":" + ((.FromPort // "-") | tostring)
+                + "-" + ((.ToPort // "-") | tostring)
+                + ":" + (
+                  (
+                    ((.IpRanges // []) | map(select(type == "object") | .CidrIp // "-"))
+                    + ((.Ipv6Ranges // []) | map(select(type == "object") | .CidrIpv6 // "-"))
+                    + ((.UserIdGroupPairs // []) | map(select(type == "object") | .GroupId // "-"))
+                    + ((.PrefixListIds // []) | map(select(type == "object") | .PrefixListId // "-"))
+                  )
+                  | join(",")
+                )
+              )
+            ) | join(";")
+          ),
+          # Egress rules
+          (
+            ($sg.IpPermissionsEgress // []) | map(
+              (
+                (.IpProtocol // "-")
+                + ":" + ((.FromPort // "-") | tostring)
+                + "-" + ((.ToPort // "-") | tostring)
+                + ":" + (
+                  (
+                    ((.IpRanges // []) | map(select(type == "object") | .CidrIp // "-"))
+                    + ((.Ipv6Ranges // []) | map(select(type == "object") | .CidrIpv6 // "-"))
+                    + ((.UserIdGroupPairs // []) | map(select(type == "object") | .GroupId // "-"))
+                    + ((.PrefixListIds // []) | map(select(type == "object") | .PrefixListId // "-"))
+                  )
+                  | join(",")
+                )
+              )
+            ) | join(";")
+          ),
+          # Tags
+          (
+            ($sg.Tags // []) | map("\(.Key)=\(.Value)") | join(";")
+          )
+        ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-security-groups='report_vpcs_security_groups';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: EC2 Instances across all VPCs
+# Processes each vpc-*/vpc_ec2_instances.json file
+# Aggregates into a single CSV:
+# - VPC, InstanceId, State, SubnetId, VpcId, PrivateIpAddress, PublicIpAddress, IamRole, Tags
+#
+# Output: vpcs_ec2_instances.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_ec2_instances () {
+
+    local output_file="${exports_folder}/vpcs_ec2_instances.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      InstanceId
+      State
+      SubnetId
+      VpcId
+      PrivateIpAddress
+      PublicIpAddress
+      IamRole
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/vpc_ec2_instances.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .[]? as $ec2 |
+          [
+              $vpc,
+              ($ec2.InstanceId // "-"),
+              ($ec2.State // "-"),
+              ($ec2.SubnetId // "-"),
+              ($ec2.VpcId // "-"),
+              ($ec2.PrivateIpAddress // "-"),
+              ($ec2.PublicIpAddress // "-"),
+              ($ec2.IamRole // "-"),
+              (
+                  ($ec2.Tags // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-ec2-instances='report_vpcs_ec2_instances';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: NAT Gateways across all VPCs
+# Processes each vpc-*/vpc_nat_gateways.json file
+# Aggregates into a single CSV:
+# - VPC, NatGatewayId, State, VpcId, SubnetId, ConnectivityType, CreateTime,
+#   AllocationId, NetworkInterfaceId, PrivateIp, PublicIp, AssociationId, IsPrimary, AddressStatus,
+#   Tags
+#
+# Output: vpcs_nat_gateways.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_nat_gateways () {
+
+    local output_file="${exports_folder}/vpcs_nat_gateways.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      NatGatewayId
+      State
+      VpcId
+      SubnetId
+      ConnectivityType
+      CreateTime
+      AllocationId
+      NetworkInterfaceId
+      PrivateIp
+      PublicIp
+      AssociationId
+      IsPrimary
+      AddressStatus
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/vpc_nat_gateways.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .NatGateways[]? as $nat |
+          ($nat.NatGatewayAddresses[]? // [{}]) as $addr |
+          [
+              $vpc,
+              ($nat.NatGatewayId // "-"),
+              ($nat.State // "-"),
+              ($nat.VpcId // "-"),
+              ($nat.SubnetId // "-"),
+              ($nat.ConnectivityType // "-"),
+              ($nat.CreateTime // "-"),
+              ($addr.AllocationId // "-"),
+              ($addr.NetworkInterfaceId // "-"),
+              ($addr.PrivateIp // "-"),
+              ($addr.PublicIp // "-"),
+              ($addr.AssociationId // "-"),
+              ($addr.IsPrimary | tostring // "-"),
+              ($addr.Status // "-"),
+              (
+                  ($nat.Tags // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-nat-gateways='report_vpcs_nat_gateways';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: Unassociated VPC Route Tables across all VPCs
+# Processes each vpc-*/vpc_route_tables_unassociated.json file
+# Aggregates into a single CSV:
+# - VPC, RouteTableId, VpcId, OwnerId,
+#   AssociationId, AssociationState, Main,
+#   DestinationCidrBlock, GatewayId, Origin, RouteState,
+#   Tags
+#
+# Output: vpcs_route_tables_unassociated.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_route_tables_unassociated () {
+
+    local output_file="${exports_folder}/vpcs_route_tables_unassociated.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      RouteTableId
+      VpcId
+      OwnerId
+      AssociationId
+      AssociationState
+      Main
+      DestinationCidrBlock
+      GatewayId
+      Origin
+      RouteState
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/vpc_route_tables_unassociated.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .[]? as $rtb |
+          ($rtb.Associations[]? // [{}]) as $assoc |
+          ($rtb.Routes[]? // [{}]) as $route |
+          [
+              $vpc,
+              ($rtb.RouteTableId // "-"),
+              ($rtb.VpcId // "-"),
+              ($rtb.OwnerId // "-"),
+              ($assoc.RouteTableAssociationId // "-"),
+              ($assoc.AssociationState.State // "-"),
+              ($assoc.Main | tostring // "-"),
+              ($route.DestinationCidrBlock // "-"),
+              ($route.GatewayId // "-"),
+              ($route.Origin // "-"),
+              ($route.State // "-"),
+              (
+                  ($rtb.Tags // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-route-tables-unassociated='report_vpcs_route_tables_unassociated';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: VPC Route Tables across all VPCs
+# Processes each vpc-*/vpc_route_tables.json file
+# Aggregates into a single CSV:
+# - VPC, RouteTableId, VpcId, OwnerId,
+#   AssociationId, AssociationState, Main, SubnetId,
+#   Destination (CIDR or PrefixList), GatewayId, TransitGatewayId, VpcPeeringConnectionId, Origin, State,
+#   Tags
+#
+# Output: vpcs_route_tables.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_route_tables () {
+
+    local output_file="${exports_folder}/vpcs_route_tables.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      RouteTableId
+      VpcId
+      OwnerId
+      AssociationId
+      AssociationState
+      Main
+      SubnetId
+      Destination
+      GatewayId
+      TransitGatewayId
+      VpcPeeringConnectionId
+      Origin
+      RouteState
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/vpc_route_tables.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .RouteTables[]? as $rtb |
+          ($rtb.Associations[]? // [{}]) as $assoc |
+          ($rtb.Routes[]? // [{}]) as $route |
+          [
+              $vpc,
+              ($rtb.RouteTableId // "-"),
+              ($rtb.VpcId // "-"),
+              ($rtb.OwnerId // "-"),
+              ($assoc.RouteTableAssociationId // "-"),
+              ($assoc.AssociationState.State // "-"),
+              ($assoc.Main | tostring // "-"),
+              ($assoc.SubnetId // "-"),
+              (
+                  $route.DestinationCidrBlock //
+                  $route.DestinationPrefixListId // "-"
+              ),
+              ($route.GatewayId // "-"),
+              ($route.TransitGatewayId // "-"),
+              ($route.VpcPeeringConnectionId // "-"),
+              ($route.Origin // "-"),
+              ($route.State // "-"),
+              (
+                  ($rtb.Tags // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-route-tables='report_vpcs_route_tables';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: Transit Gateway Attachments across all VPCs
+# Processes each vpc-*/transit_gateways_attachments.json file
+# Aggregates into a single CSV:
+# - VPC, TransitGatewayAttachmentId, TransitGatewayId, TransitGatewayOwnerId,
+#   ResourceOwnerId, ResourceType, ResourceId, State,
+#   AssociatedRouteTableId, AssociationState,
+#   CreationTime, Tags
+#
+# Output: vpcs_transit_gateway_attachments.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_transit_gateway_attachments () {
+
+    local output_file="${exports_folder}/vpcs_tgw_attachments.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      TransitGatewayAttachmentId
+      TransitGatewayId
+      TransitGatewayOwnerId
+      ResourceOwnerId
+      ResourceType
+      ResourceId
+      State
+      AssociatedRouteTableId
+      AssociationState
+      CreationTime
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/vpc_tgw_attachments.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .TransitGatewayAttachments[]? as $attach |
+          [
+              $vpc,
+              ($attach.TransitGatewayAttachmentId // "-"),
+              ($attach.TransitGatewayId // "-"),
+              ($attach.TransitGatewayOwnerId // "-"),
+              ($attach.ResourceOwnerId // "-"),
+              ($attach.ResourceType // "-"),
+              ($attach.ResourceId // "-"),
+              ($attach.State // "-"),
+              ($attach.Association.TransitGatewayRouteTableId // "-"),
+              ($attach.Association.State // "-"),
+              ($attach.CreationTime // "-"),
+              (
+                  ($attach.Tags // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-transit-gateway-attachments='report_vpcs_transit_gateway_attachments';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: VPC Metadata across all VPCs
+# Processes each vpc-*/vpc.json file
+# Aggregates into a single CSV:
+# - VPC, VpcId, State, OwnerId, InstanceTenancy, CidrBlock, DhcpOptionsId, IsDefault, InternetGatewayBlockMode,
+#   CidrBlockAssociations, Tags
+#
+# Output: vpcs_metadata.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_metadata () {
+
+    local output_file="${exports_folder}/vpcs_metadata.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      VpcId
+      State
+      OwnerId
+      InstanceTenancy
+      CidrBlock
+      DhcpOptionsId
+      IsDefault
+      InternetGatewayBlockMode
+      CidrBlockAssociations
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/vpc.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .Vpcs[]? as $vpc_obj |
+          [
+              $vpc,
+              ($vpc_obj.VpcId // "-"),
+              ($vpc_obj.State // "-"),
+              ($vpc_obj.OwnerId // "-"),
+              ($vpc_obj.InstanceTenancy // "-"),
+              ($vpc_obj.CidrBlock // "-"),
+              ($vpc_obj.DhcpOptionsId // "-"),
+              ($vpc_obj.IsDefault | tostring // "-"),
+              ($vpc_obj.BlockPublicAccessStates.InternetGatewayBlockMode // "-"),
+              (
+                  ($vpc_obj.CidrBlockAssociationSet // [])
+                  | map(
+                      (.AssociationId // "-") + "=" + (.CidrBlock // "-") + "(" + (.CidrBlockState.State // "-") + ")"
+                  )
+                  | join(";")
+              ),
+              (
+                  ($vpc_obj.Tags // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-metadata='report_vpcs_metadata';
+
+#------------------------------------------------------------------------------#
+# Report Aggregator: VPC Endpoints across all VPCs
+# Processes each vpc-*/vpc_endpoints.json file
+# Aggregates into a single CSV:
+# - VPC, VpcEndpointId, VpcEndpointType, VpcId, ServiceName, ServiceRegion,
+#   State, PrivateDnsEnabled, RequesterManaged, IpAddressType, CreationTimestamp,
+#   RouteTableIds, SubnetIds, NetworkInterfaceIds, Groups, DnsEntries, Tags
+#
+# Output: vpcs_endpoints.csv in exports folder
+#------------------------------------------------------------------------------#
+
+function report_vpcs_endpoints () {
+
+    local output_file="${exports_folder}/vpcs_endpoints.csv";
+    : > "${output_file}";
+
+    ## Define the CSV headers as an array
+    local headers=(
+      VPC
+      VpcEndpointId
+      VpcEndpointType
+      VpcId
+      ServiceName
+      ServiceRegion
+      State
+      PrivateDnsEnabled
+      RequesterManaged
+      IpAddressType
+      CreationTimestamp
+      RouteTableIds
+      SubnetIds
+      NetworkInterfaceIds
+      Groups
+      DnsEntries
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
+
+    for vpc_path in "${latest_folder}/vpcs"/*/; do
+      local vpc_folder;
+      vpc_folder="$( basename "${vpc_path}" )";
+
+      [[ "${vpc_folder}" == "shared" ]] && continue;
+      [[ "${vpc_folder}" == "exports" ]] && continue;
+
+      local target_file="${latest_folder}/vpcs/${vpc_folder}/vpc_endpoints.json";
+      if [[ ! -f "${target_file}" ]]; then
+              # echo -e "Skipping: ${target_file} not found";
+              continue;
+        else  echo -e "\nProcessing: ${target_file}";
+      fi;
+
+      jq -r --arg vpc "${vpc_folder}" '
+          .VpcEndpoints[]? as $ep |
+          [
+              $vpc,
+              ($ep.VpcEndpointId // "-"),
+              ($ep.VpcEndpointType // "-"),
+              ($ep.VpcId // "-"),
+              ($ep.ServiceName // "-"),
+              ($ep.ServiceRegion // "-"),
+              ($ep.State // "-"),
+              ($ep.PrivateDnsEnabled | tostring // "-"),
+              ($ep.RequesterManaged | tostring // "-"),
+              ($ep.IpAddressType // "-"),
+              ($ep.CreationTimestamp // "-"),
+              (
+                  ($ep.RouteTableIds // [])
+                  | join(",")
+              ),
+              (
+                  ($ep.SubnetIds // [])
+                  | join(",")
+              ),
+              (
+                  ($ep.NetworkInterfaceIds // [])
+                  | join(",")
+              ),
+              (
+                  ($ep.Groups // [])
+                  | map("\(.GroupId)=\(.GroupName)")
+                  | join(";")
+              ),
+              (
+                  ($ep.DnsEntries // [])
+                  | map("\(.DnsName)=\(.HostedZoneId)")
+                  | join(";")
+              ),
+              (
+                  ($ep.Tags // [])
+                  | map("\(.Key)=\(.Value)")
+                  | join(";")
+              )
+          ] | @csv
+      ' "${target_file}" | tee -a "${output_file}";
+    done;
+
+    return 0;
+}; alias report-vpcs-endpoints='report_vpcs_endpoints';
+
+report_interfaces_ec2_instances; echo -e;
+report_interfaces_nat_gateways; echo -e;
+report_interfaces_transit_gateway_attachments; echo -e;
+report_interfaces_vpc_endpoints; echo -e;
+report_subnets_default_route_tables; echo -e;
+report_subnets_ec2_instances; echo -e;
+report_subnets_subnet_route_tables; echo -e;
+report_subnets_metadata; echo -e;
+report_vpcs_dhcp_options; echo -e;
+report_vpcs_ec2_instances; echo -e;
+report_vpcs_endpoints; echo -e;
+report_vpcs_igws; echo -e;
+report_vpcs_metadata; echo -e;
+report_vpcs_nat_gateways; echo -e;
+report_vpcs_network_acls; echo -e;
+report_vpcs_network_interfaces; echo -e;
+report_vpcs_route_tables; echo -e;
+report_vpcs_route_tables_unassociated; echo -e;
+report_vpcs_security_groups; echo -e;
+report_vpcs_security_groups_unattached; echo -e;
+report_vpcs_transit_gateway_attachments; echo -e;

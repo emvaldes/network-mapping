@@ -1,0 +1,8 @@
+[
+    {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "TransitGatewayId": "tgw-001bc8550c79f14b9",
+        "Origin": "CreateRoute",
+        "State": "active"
+    }
+]

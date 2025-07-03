@@ -1,0 +1,45 @@
+{
+    "NatGateways": [
+        {
+            "CreateTime": "2025-07-09T04:12:00+00:00",
+            "NatGatewayAddresses": [
+                {
+                    "AllocationId": "eipalloc-0c3250d6084eef8be",
+                    "NetworkInterfaceId": "eni-097f65912e6e582e8",
+                    "PrivateIp": "10.0.1.190",
+                    "PublicIp": "13.223.16.32",
+                    "AssociationId": "eipassoc-08b2c0f5cd7cbf5bf",
+                    "IsPrimary": true,
+                    "Status": "succeeded"
+                }
+            ],
+            "NatGatewayId": "nat-049d8400adc86f196",
+            "State": "available",
+            "SubnetId": "subnet-03ea1805ea65cba01",
+            "VpcId": "vpc-028b2dc2728406fd9",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "NatGateway"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-NatGateway"
+                }
+            ],
+            "ConnectivityType": "public"
+        }
+    ]
+}

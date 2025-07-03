@@ -1,0 +1,14 @@
+[
+    {
+        "PublicIp": "13.223.16.32",
+        "AllocationId": "eipalloc-0c3250d6084eef8be",
+        "AssociatedInstance": null,
+        "AssociatedNetworkInterface": "eni-097f65912e6e582e8"
+    },
+    {
+        "PublicIp": "3.213.170.119",
+        "AllocationId": "eipalloc-035ebc52f1c086eb0",
+        "AssociatedInstance": "i-0e64cbd9718ff9743",
+        "AssociatedNetworkInterface": "eni-03fd376cea628ecb2"
+    }
+]

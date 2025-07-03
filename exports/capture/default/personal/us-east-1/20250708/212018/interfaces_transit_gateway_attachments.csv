@@ -1,0 +1,4 @@
+VPC,NetworkInterfaceId,AttachmentId,Status,SubnetId,VpcId,PrivateIpAddress,InterfaceType
+"devops-locked-vpc","eni-05bb8586e2fb873f7","ela-attach-0c510a2b30c936f3c","in-use","subnet-0a7863c4791ae49f2","vpc-0f7fa8fdff02da590","10.2.1.72","transit_gateway"
+"devops-private-vpc","eni-02909cb1102de2d5c","ela-attach-0a68261fdcb072a7b","in-use","subnet-0ebc71f9acbeba83c","vpc-0dd98b0cb5d3ded56","10.1.1.208","transit_gateway"
+"devops-public-vpc","eni-07d7dc8112f5ab038","ela-attach-05c7491e4a4094053","in-use","subnet-03ea1805ea65cba01","vpc-028b2dc2728406fd9","10.0.1.193","transit_gateway"

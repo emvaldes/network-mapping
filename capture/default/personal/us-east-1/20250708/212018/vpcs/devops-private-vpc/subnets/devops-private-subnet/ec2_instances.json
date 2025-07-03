@@ -1,0 +1,57 @@
+[
+  {
+    "InstanceId": "i-07dd74937c817548b",
+    "State": "running",
+    "SubnetId": "subnet-0ebc71f9acbeba83c",
+    "VpcId": "vpc-0dd98b0cb5d3ded56",
+    "PrivateIpAddress": "10.1.1.106",
+    "PublicIpAddress": null,
+    "IamRole": "arn:aws:iam::***:instance-profile/network-mapping-SSMInstanceProfile-mcP8cbDL9bZW",
+    "Tags": [
+      {
+        "Key": "Name",
+        "Value": "DevOps-EC2-Private"
+      },
+      {
+        "Key": "aws:cloudformation:stack-id",
+        "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+      },
+      {
+        "Key": "DevOps",
+        "Value": "true"
+      },
+      {
+        "Key": "aws:cloudformation:logical-id",
+        "Value": "EC2PrivateInstance"
+      },
+      {
+        "Key": "aws:cloudformation:stack-name",
+        "Value": "network-mapping"
+      }
+    ],
+    "SSM": {
+      "InstanceId": "i-07dd74937c817548b",
+      "PingStatus": "Online",
+      "LastPingDateTime": "2025-07-08T21:20:26.230000-07:00",
+      "AgentVersion": "3.0.1124.0",
+      "IsLatestVersion": false,
+      "PlatformType": "Linux",
+      "PlatformName": "Amazon Linux",
+      "PlatformVersion": "2",
+      "ResourceType": "EC2Instance",
+      "IPAddress": "10.1.1.106",
+      "ComputerName": "ip-10-1-1-106.ec2.internal",
+      "AssociationStatus": "Pending",
+      "LastAssociationExecutionDate": "2025-07-08T21:20:15.472000-07:00",
+      "AssociationOverview": {
+        "DetailedStatus": "InProgress",
+        "InstanceAssociationStatusAggregatedCount": {
+          "Pending": 4,
+          "Success": 1
+        }
+      },
+      "SourceId": "i-07dd74937c817548b",
+      "SourceType": "AWS::EC2::Instance"
+    }
+  }
+]

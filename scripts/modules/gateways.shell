@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+#------------------------------------------------------------------------------
+# vpc_internet_gateways
+#
+# Queries Internet Gateways attached to a specific VPC and saves them to a JSON file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+#
+# Output File:
+#   - internet_gateways.json (or as named by caller)
+#
+# Example:
+#   vpc_internet_gateways "./internet_gateways.json" "vpc-0123456789abcdef0"
+#------------------------------------------------------------------------------
+
+function vpc_internet_gateways () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-internet-gateways \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=attachment.vpc-id,Values=${vpc_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-internet-gateways='vpc_internet_gateways';
+
+#------------------------------------------------------------------------------
+# vpc_nat_gateways
+#
+# Queries all NAT Gateways in a specific VPC and saves them to a JSON file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+#
+# Output File:
+#   - nat_gateways.json (or as named by caller)
+#
+# Example:
+#   vpc_nat_gateways "./nat_gateways.json" "vpc-0123456789abcdef0"
+#------------------------------------------------------------------------------
+
+function vpc_nat_gateways () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-nat-gateways \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filter "Name=vpc-id,Values=${vpc_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-nat-gateways='vpc_nat_gateways';

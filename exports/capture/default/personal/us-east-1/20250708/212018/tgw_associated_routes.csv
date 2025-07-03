@@ -1,0 +1,4 @@
+TransitGatewayAttachmentId,ResourceId,ResourceType,State
+"tgw-attach-09fef679a102279f2","vpc-0dd98b0cb5d3ded56","vpc","associated"
+"tgw-attach-0189b5caa6e869108","vpc-028b2dc2728406fd9","vpc","associated"
+"tgw-attach-0a3e2ed35a7e0b36b","vpc-0f7fa8fdff02da590","vpc","associated"

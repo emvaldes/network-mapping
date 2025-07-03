@@ -1,0 +1,4 @@
+VPC,TransitGatewayAttachmentId,TransitGatewayId,ResourceType,ResourceId,State,AssociationState,AssociationTransitGatewayRouteTableId
+"devops-locked-vpc","-","-","-","-","-","-","-"
+"devops-private-vpc","-","-","-","-","-","-","-"
+"devops-public-vpc","-","-","-","-","-","-","-"

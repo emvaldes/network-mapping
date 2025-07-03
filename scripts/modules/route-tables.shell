@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+
+#------------------------------------------------------------------------------
+# default_route_tables
+#
+# Queries a specific route table for the default route (`0.0.0.0/0`) and outputs
+# only the routes with valid next-hop targets (IGW, TGW, NAT Gateway, or VPC Peering).
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: Route Table ID
+#
+# Output File:
+#   - default_route_<RouteTableId>.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function default_route_tables () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local route_table_id="${2}" || return 1;
+
+    aws ec2 describe-route-tables \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --route-table-ids "${route_table_id}" \
+        --query 'RouteTables[0].Routes[?DestinationCidrBlock==`0.0.0.0/0` && (GatewayId!=null || TransitGatewayId!=null || NatGatewayId!=null || VpcPeeringConnectionId!=null)]' \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias default-route-check='default_route_tables';
+
+#------------------------------------------------------------------------------
+# vpc_route_tables
+#
+# Queries all route tables in a specific VPC and saves them to a JSON file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+#
+# Output File:
+#   - route_tables.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function vpc_route_tables () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-route-tables \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=vpc-id,Values=${vpc_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-route-tables='vpc_route_tables';
+
+#------------------------------------------------------------------------------
+# vpc_route_tables_unassociated
+#
+# Extracts route tables in a VPC that have no subnet associations.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: Input route tables JSON file (from vpc_route_tables)
+#
+# Output File:
+#   - route_tables_unassociated.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function vpc_route_tables_unassociated () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local input_file="${2}" || return 1;
+
+    jq '[
+          .[][] |
+          select( .Associations | all( .SubnetId == null ) )
+        ]' "${input_file}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-route-tables-unassociated='vpc_route_tables_unassociated';
+
+#------------------------------------------------------------------------------
+# main_route_table_id
+#
+# Retrieves the main route table ID for a given VPC.
+# Used when a subnet does not have its own route table association.
+#
+# Parameters:
+#   - 1: VPC ID
+#
+# Output:
+#   - Route Table ID (printed to stdout in the configured output format)
+#------------------------------------------------------------------------------
+
+function main_route_table_id () {
+
+    [[ -n ${1:-} ]] && local vpc_id="${1}" || return 1;
+
+    aws ec2 describe-route-tables \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=vpc-id,Values=${vpc_id}" \
+                  "Name=association.main,Values=true" \
+        --query 'RouteTables[0].RouteTableId' \
+        --output "${output_format}";
+
+    return 0;
+}; alias main-route-table-id='main_route_table_id';
+
+#------------------------------------------------------------------------------
+# vpc_subnet_route_tables
+#
+# Queries the route table associated with a specific subnet and saves it to a file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: Subnet ID
+#
+# Output File:
+#   - subnet_route_table.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function vpc_subnet_route_tables () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local subnet_id="${2}" || return 1;
+
+    aws ec2 describe-route-tables \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=association.subnet-id,Values=${subnet_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias vpc-subnet-route-table='vpc_subnet_route_tables';
+
+#------------------------------------------------------------------------------
+# vpc_subnet_route_table_id
+#
+# Extracts the Route Table ID from a subnet's route table file.
+# Falls back to the VPC's main route table if the subnet has no association.
+# Returns the Route Table ID via a variable reference.
+#
+# Parameters:
+#   - 1: Output variable name to assign the Route Table ID
+#   - 2: Subnet route table JSON file
+#   - 3: VPC ID
+#------------------------------------------------------------------------------
+
+function vpc_subnet_route_table_id () {
+
+    [[ -n ${1:-} ]] && local output_variable="${1}" || return 1;
+    [[ -n ${2:-} ]] && local subnet_route_table_file="${2}" || return 1;
+    [[ -n ${3:-} ]] && local vpc_id="${3}" || return 1;
+
+    local route_table_id="$(
+      jq -r '.RouteTables[0].RouteTableId' "${subnet_route_table_file}"
+    )";
+
+    if [[ -z "${route_table_id}" || "${route_table_id}" == "null" ]]; then
+        route_table_id="$(
+          main_route_table_id "${vpc_id}" \
+                              "${output_format}"
+        )";
+    fi;
+
+    printf -v "${output_variable}" '%s' "${route_table_id}";
+
+    return 0;
+}; alias vpc_subnet-route-table-id='vpc_subnet_route_table_id';

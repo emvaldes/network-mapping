@@ -1,0 +1,289 @@
+#!/usr/bin/env bash
+
+#------------------------------------------------------------------------------
+# vpc_network_interfaces
+#
+# Queries all network interfaces in a specific VPC and saves them to a file.
+# Splits the output into categorized JSON files by resource type:
+# - EC2 Instances
+# - VPC Endpoints
+# - NAT Gateways
+# - Transit Gateway Attachments
+# - Others (uncategorized)
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+#
+# Output:
+#   - network_interfaces.json (full list)
+#   - interfaces/ec2_instances.json, vpc_endpoints.json, etc.
+#------------------------------------------------------------------------------
+
+function vpc_network_interfaces () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-network-interfaces \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=vpc-id,Values=${vpc_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    local output_directory;
+    output_directory="$(dirname "${output_file}")/interfaces";
+    mkdir -p "${output_directory}";
+
+    jq '.NetworkInterfaces | map( select(
+          .InterfaceType == "interface"
+          and .Attachment.InstanceId != null
+        ) )' "${output_file}" \
+    > "${output_directory}/ec2_instances.json";
+
+    jq '.NetworkInterfaces | map( select(
+          .InterfaceType == "vpc_endpoint"
+        ) )' "${output_file}" \
+    > "${output_directory}/vpc_endpoints.json";
+
+    jq '.NetworkInterfaces | map( select(
+          .InterfaceType == "nat_gateway"
+        ) )' "${output_file}" \
+    > "${output_directory}/nat_gateways.json";
+
+    jq '.NetworkInterfaces | map( select(
+          .InterfaceType == "transit_gateway"
+        ) )' "${output_file}" \
+    > "${output_directory}/transit_gateway_attachments.json";
+
+    jq '.NetworkInterfaces | map(select(
+          .InterfaceType != "interface"
+          and .InterfaceType != "vpc_endpoint"
+          and .InterfaceType != "nat_gateway"
+          and .InterfaceType != "transit_gateway"
+        ))' "${output_file}" \
+    > "${output_directory}/others.json";
+
+    return 0;
+
+}; alias vpc-network-interfaces='vpc_network_interfaces';
+
+#------------------------------------------------------------------------------
+# subnet_network_interfaces
+#
+# Queries all network interfaces in a specific subnet and saves them to a file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: Subnet ID
+#
+# Output File:
+#   - subnet_network_interfaces.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function subnet_network_interfaces () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local subnet_id="${2}" || return 1;
+
+    aws ec2 describe-network-interfaces \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=subnet-id,Values=${subnet_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+
+}; alias subnet-network-interfaces='subnet_network_interfaces';
+
+#------------------------------------------------------------------------------
+# network_interfaces
+#
+# Queries network interfaces filtered by both VPC ID and Subnet ID.
+# Saves the results to a JSON file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+#   - 3: Subnet ID
+#
+# Output File:
+#   - network_interfaces.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function network_interfaces () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+    [[ -n ${3:-} ]] && local subnet_id="${3}" || return 1;
+
+    aws ec2 describe-network-interfaces \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters \
+          "Name=vpc-id,Values=${vpc_id}" \
+          "Name=subnet-id,Values=${subnet_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+
+}; alias network-interfaces='network_interfaces';
+
+#------------------------------------------------------------------------------
+# ec2_bastion_instances
+#
+# Extracts EC2 instances from a VPC's EC2 instance list where the 'Name' tag
+# contains the word "bastion" (case-insensitive).
+#
+# Parameters:
+#   - 1: Output variable name for instance data
+#   - 2: Path to EC2 instances JSON file
+#   - 3: Output file path
+#
+# Output File:
+#   - bastion_instances.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function ec2_bastion_instances () {
+
+    [[ -n ${1:-} ]] && local vref__instances="${1}" || return 1;
+    [[ -n ${2:-} ]] && local ec2_vpc_json="${2}" || return 1;
+    [[ -n ${3:-} ]] && local output_file="${3}" || return 1;
+
+    local instances="$(
+      jq '[
+            .[] |
+            select(
+              .Tags[]? |
+              select(
+                .Key == "Name" and
+                ( .Value | test( "bastion"; "i" ) )
+              )
+            )
+          ]' "${ec2_vpc_json}"
+    )";
+
+    jq <<< "${instances}" > "${output_file}";
+    printf -v "${vref__instances}" '%s'  "${instances}";
+
+    return 0;
+}; alias ec2-bastion-instances='ec2_bastion_instances';
+
+#------------------------------------------------------------------------------
+# ec2_bastion_accessibility
+#
+# Builds an accessibility map showing which private subnet instances are reachable
+# from each bastion host.
+#
+# Parameters:
+#   - 1: Bastion instances JSON file
+#   - 2: Subnet EC2 instances JSON file
+#   - 3: Output file path for the accessibility map
+#
+# Output File:
+#   - private_reachability.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function ec2_bastion_accessibility () {
+
+    [[ -n ${1:-} ]] && local bastion_instances="${1}" || return 1;
+    [[ -n ${2:-} ]] && local subnet_instances_json="${2}" || return 1;
+    [[ -n ${3:-} ]] && local output_file="${3}" || return 1;
+
+    local destinations="$(
+      jq -c '[
+              .[] |
+              select( .PublicIp == null or .PublicIp == "" or .PublicIp == "null" ) |
+              {
+                hostname: ( .Tags[]? | select( .Key == "Name" ) | .Value // "unknown" ),
+                private_ip: .PrivateIp
+              }
+            ]' "${subnet_instances_json}"
+    )";
+
+    jq -c '.[]' <<< "${bastion_instances}" | \
+    while read -r bastion; do
+
+      local bastion_hostname="$(
+        jq -r '
+              .Tags[]? |
+              select( .Key == "Name" ) |
+              .Value
+              ' <<< "${bastion}"
+      )";
+
+      local bastion_private_ip="$(
+        jq -r '.PrivateIpAddress' <<< "${bastion}"
+      )";
+
+      local bastion_public_ip="$(
+        jq -r '.PublicIpAddress' <<< "${bastion}"
+      )";
+
+      jq  --null-input \
+          --arg hostname "${bastion_hostname}" \
+          --arg private_ip "${bastion_private_ip}" \
+          --arg public_ip "${bastion_public_ip}" \
+          --argjson destinations "${destinations}" \
+          '{
+            source: {
+              hostname: $hostname,
+              addresses: {
+                public_ip: $public_ip,
+                private_ip: $private_ip
+              }
+            },
+            destination: $destinations
+          }' \
+      >> "${output_file}";
+
+    done;
+
+    return 0;
+}; alias ec2-bastion-accessibility='ec2_bastion_accessibility';
+
+#------------------------------------------------------------------------------
+# elastic_ips
+#
+# Queries Elastic IP (EIP) addresses in the region and saves the results.
+# Extracts:
+# - Public IP
+# - Allocation ID
+# - Associated instance and network interface IDs.
+#
+# Only runs if the output file does not already exist.
+#
+# Parameters:
+#   - 1: Output file path
+#
+# Output File:
+#   - elastic_ips.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function elastic_ips () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+
+    if [[ ! -f "${output_file}" ]]; then
+
+        aws ec2 describe-addresses \
+            --profile "${target_profile}" \
+            --region "${target_region}" \
+            --query '
+                    Addresses[*].{
+                      PublicIp:PublicIp,
+                      AllocationId:AllocationId,
+                      AssociatedInstance:InstanceId,
+                      AssociatedNetworkInterface:NetworkInterfaceId
+                    }
+                    ' \
+            --output "${output_format}" \
+        > "${output_file}";
+
+    fi;
+
+    return 0;
+}; alias elastic-ips='elastic_ips';

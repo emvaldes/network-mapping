@@ -1,0 +1,104 @@
+{
+    "VpcPeeringConnections": [
+        {
+            "AccepterVpcInfo": {
+                "CidrBlock": "10.1.0.0/16",
+                "CidrBlockSet": [
+                    {
+                        "CidrBlock": "10.1.0.0/16"
+                    }
+                ],
+                "OwnerId": "***",
+                "PeeringOptions": {
+                    "AllowDnsResolutionFromRemoteVpc": false,
+                    "AllowEgressFromLocalClassicLinkToRemoteVpc": false,
+                    "AllowEgressFromLocalVpcToRemoteClassicLink": false
+                },
+                "VpcId": "vpc-0dd98b0cb5d3ded56",
+                "Region": "us-east-1"
+            },
+            "RequesterVpcInfo": {
+                "CidrBlock": "10.0.0.0/16",
+                "CidrBlockSet": [
+                    {
+                        "CidrBlock": "10.0.0.0/16"
+                    }
+                ],
+                "OwnerId": "***",
+                "PeeringOptions": {
+                    "AllowDnsResolutionFromRemoteVpc": false,
+                    "AllowEgressFromLocalClassicLinkToRemoteVpc": false,
+                    "AllowEgressFromLocalVpcToRemoteClassicLink": false
+                },
+                "VpcId": "vpc-028b2dc2728406fd9",
+                "Region": "us-east-1"
+            },
+            "Status": {
+                "Code": "active",
+                "Message": "Active"
+            },
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "VPCPeeringConnection"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-VPCPeering-PublicPrivate"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                }
+            ],
+            "VpcPeeringConnectionId": "pcx-0b2f7050573bcea16"
+        },
+        {
+            "AccepterVpcInfo": {
+                "OwnerId": "***",
+                "VpcId": "vpc-00833a394354d709d",
+                "Region": "us-east-1"
+            },
+            "RequesterVpcInfo": {
+                "OwnerId": "***",
+                "VpcId": "vpc-0fb6982d9af6edc12",
+                "Region": "us-east-1"
+            },
+            "Status": {
+                "Code": "deleted",
+                "Message": "Deleted by ***"
+            },
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/77afa390-5c6f-11f0-992c-123141793963"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "VPCPeeringConnection"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-VPCPeering-PublicPrivate"
+                }
+            ],
+            "VpcPeeringConnectionId": "pcx-01c4be7ca916feee7"
+        }
+    ]
+}

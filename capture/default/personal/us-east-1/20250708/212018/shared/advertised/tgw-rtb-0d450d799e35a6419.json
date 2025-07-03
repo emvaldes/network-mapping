@@ -1,0 +1,44 @@
+{
+    "Routes": [
+        {
+            "DestinationCidrBlock": "10.0.0.0/16",
+            "TransitGatewayRouteTableAnnouncementId": "",
+            "TransitGatewayAttachments": [
+                {
+                    "ResourceId": "vpc-028b2dc2728406fd9",
+                    "TransitGatewayAttachmentId": "tgw-attach-0189b5caa6e869108",
+                    "ResourceType": "vpc"
+                }
+            ],
+            "Type": "propagated",
+            "State": "active"
+        },
+        {
+            "DestinationCidrBlock": "10.1.0.0/16",
+            "TransitGatewayRouteTableAnnouncementId": "",
+            "TransitGatewayAttachments": [
+                {
+                    "ResourceId": "vpc-0dd98b0cb5d3ded56",
+                    "TransitGatewayAttachmentId": "tgw-attach-09fef679a102279f2",
+                    "ResourceType": "vpc"
+                }
+            ],
+            "Type": "propagated",
+            "State": "active"
+        },
+        {
+            "DestinationCidrBlock": "10.2.0.0/16",
+            "TransitGatewayRouteTableAnnouncementId": "",
+            "TransitGatewayAttachments": [
+                {
+                    "ResourceId": "vpc-0f7fa8fdff02da590",
+                    "TransitGatewayAttachmentId": "tgw-attach-0a3e2ed35a7e0b36b",
+                    "ResourceType": "vpc"
+                }
+            ],
+            "Type": "propagated",
+            "State": "active"
+        }
+    ],
+    "AdditionalRoutesAvailable": false
+}

@@ -1,0 +1,878 @@
+{
+    "VpcEndpoints": [
+        {
+            "VpcEndpointId": "vpce-020af608b10402b00",
+            "VpcEndpointType": "Gateway",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.s3",
+            "State": "available",
+            "PolicyDocument": "{\"Version\":\"2008-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"*\",\"Resource\":\"*\"}]}",
+            "RouteTableIds": [
+                "rtb-094fea2f99bb0acc9"
+            ],
+            "SubnetIds": [],
+            "Groups": [],
+            "PrivateDnsEnabled": false,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [],
+            "DnsEntries": [],
+            "CreationTimestamp": "2025-07-09T04:11:58+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointS3"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointS3"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-04586057e6b9b81db",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.backup",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-0f125d18eb8b3ab69"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-04586057e6b9b81db-sl1tkf65.backup.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-04586057e6b9b81db-sl1tkf65-us-east-1a.backup.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "backup.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z026567834LY9X5S1N1MJ"
+                },
+                {
+                    "DnsName": "backup.us-east-1.api.aws",
+                    "HostedZoneId": "Z0265677LUYPI9J3JEIH"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:05.259000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointBackup"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointBackup"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-086fb7be5b7d2272d",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.kms",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-03c5529fcc6eb85c8"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-086fb7be5b7d2272d-kobc014v.kms.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-086fb7be5b7d2272d-kobc014v-us-east-1a.kms.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "kms.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z030023917BDVA8XKEB50"
+                },
+                {
+                    "DnsName": "kms.us-east-1.api.aws",
+                    "HostedZoneId": "Z06247831R2WZCRR1ZFSH"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:05.344000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointKMS"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointKMS"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-07e3c737e14d68440",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.ec2messages",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-036c6bc4322541945"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-07e3c737e14d68440-p6spjg4v.ec2messages.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-07e3c737e14d68440-p6spjg4v-us-east-1a.ec2messages.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "ec2messages.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z05454742G75508TQG60V"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:05.360000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointEC2Messages"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointEC2Messages"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-0b3ff0d121c4eb4ae",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.ssmmessages",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-037bfcb48e40337b1"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-0b3ff0d121c4eb4ae-dpm2x6xr.ssmmessages.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-0b3ff0d121c4eb4ae-dpm2x6xr-us-east-1a.ssmmessages.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "ssmmessages.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z05471849R948FVXIYRU"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:05.416000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointSSMMessages"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointSSMMessages"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-0b642e67cbc147924",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.rds",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-01e634f18e3dea91a"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-0b642e67cbc147924-3vs4rthx.rds.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-0b642e67cbc147924-3vs4rthx-us-east-1a.rds.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "rds.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z0624270COZOK31DU7L3"
+                },
+                {
+                    "DnsName": "rds.us-east-1.api.aws",
+                    "HostedZoneId": "Z02654751EB55RG4RMNWZ"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:05.461000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointRDS"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointRDS"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-0e4c07aa29817be75",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.secretsmanager",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-0b3b46a62db3f2b50"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-0e4c07aa29817be75-2fk8ef5l.secretsmanager.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-0e4c07aa29817be75-2fk8ef5l-us-east-1a.secretsmanager.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "secretsmanager.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z0264594M0WTN11B6J9N"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:05.482000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointSecretsManager"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointSecretsManager"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-0112c1a1538953d7d",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.ec2",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-0aee84ac0b5b89fc5"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-0112c1a1538953d7d-8ibv182i.ec2.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-0112c1a1538953d7d-8ibv182i-us-east-1a.ec2.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "ec2.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z03229292WAZ6UKMTJUBZ"
+                },
+                {
+                    "DnsName": "ec2.us-east-1.api.aws",
+                    "HostedZoneId": "Z0628761BRJ7XTI48OP1"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:05.499000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointEC2"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointEC2"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-0183586ade28a3487",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.monitoring",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-0333a5f26ecfbe3d3"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-0183586ade28a3487-827ifhmo.monitoring.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-0183586ade28a3487-827ifhmo-us-east-1a.monitoring.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "monitoring.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z06228713IYS350Y2QBXS"
+                },
+                {
+                    "DnsName": "monitoring.us-east-1.api.aws",
+                    "HostedZoneId": "Z02658791U1SV6KXZF63M"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:05.588000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointMonitoring"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointMonitoring"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-03cc85fabe0665b8a",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.sns",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-07629cb0c7a42ed3f"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-03cc85fabe0665b8a-nqdec89h.sns.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-03cc85fabe0665b8a-nqdec89h-us-east-1a.sns.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "sns.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z032112446G8SO2OL29Q"
+                },
+                {
+                    "DnsName": "sns.us-east-1.api.aws",
+                    "HostedZoneId": "Z0323087PYAP0KTBP0KR"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:38.932000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointSNS"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointSNS"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-08dbbd58f7573d512",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.events",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-008beffa32e97cea5"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-08dbbd58f7573d512-0ykg4n6v.events.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-08dbbd58f7573d512-0ykg4n6v-us-east-1a.events.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "events.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z06247671V6EYRDHZ1RO5"
+                },
+                {
+                    "DnsName": "events.us-east-1.api.aws",
+                    "HostedZoneId": "Z032310238HJ5R0K9OR07"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:39.464000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointEvents"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointEvents"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-0e0e6e23dc2b93126",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.logs",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-04e061e5cabd22dfa"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-0e0e6e23dc2b93126-7yydt65p.logs.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-0e0e6e23dc2b93126-7yydt65p-us-east-1a.logs.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "logs.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z06296552T183JWSH89CW"
+                },
+                {
+                    "DnsName": "streaming-logs.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z02647183G0LKLPKUKX85"
+                },
+                {
+                    "DnsName": "streaming-logs.us-east-1.api.aws",
+                    "HostedZoneId": "Z0264250GPNX0BL4YELN"
+                },
+                {
+                    "DnsName": "logs.us-east-1.api.aws",
+                    "HostedZoneId": "Z02642313SNWZJN4BLW6W"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:40.177000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointCloudWatchLogs"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointCloudWatchLogs"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        },
+        {
+            "VpcEndpointId": "vpce-02956469f1b13181d",
+            "VpcEndpointType": "Interface",
+            "VpcId": "vpc-0f7fa8fdff02da590",
+            "ServiceName": "com.amazonaws.us-east-1.ssm",
+            "State": "available",
+            "PolicyDocument": "{\n  \"Statement\": [\n    {\n      \"Action\": \"*\", \n      \"Effect\": \"Allow\", \n      \"Principal\": \"*\", \n      \"Resource\": \"*\"\n    }\n  ]\n}",
+            "RouteTableIds": [],
+            "SubnetIds": [
+                "subnet-0a7863c4791ae49f2"
+            ],
+            "Groups": [
+                {
+                    "GroupId": "sg-0e7e142f6e32a870f",
+                    "GroupName": "network-mapping-DevOpsSSMEndpointSG-17xbfCK1105T"
+                }
+            ],
+            "IpAddressType": "ipv4",
+            "DnsOptions": {
+                "DnsRecordIpType": "ipv4"
+            },
+            "PrivateDnsEnabled": true,
+            "RequesterManaged": false,
+            "NetworkInterfaceIds": [
+                "eni-0480056519e4fc83b"
+            ],
+            "DnsEntries": [
+                {
+                    "DnsName": "vpce-02956469f1b13181d-52f9h186.ssm.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "vpce-02956469f1b13181d-52f9h186-us-east-1a.ssm.us-east-1.vpce.amazonaws.com",
+                    "HostedZoneId": "Z7HUB22UULQXV"
+                },
+                {
+                    "DnsName": "ssm.us-east-1.amazonaws.com",
+                    "HostedZoneId": "Z06298123H07IRG2OTARV"
+                }
+            ],
+            "CreationTimestamp": "2025-07-09T04:12:53.845000+00:00",
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "DevOpsEndpointSSM"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EndpointSSM"
+                }
+            ],
+            "OwnerId": "***",
+            "ServiceRegion": "us-east-1"
+        }
+    ]
+}

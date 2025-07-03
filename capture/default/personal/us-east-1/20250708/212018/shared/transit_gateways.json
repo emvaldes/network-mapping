@@ -1,0 +1,64 @@
+{
+    "TransitGateways": [
+        {
+            "TransitGatewayId": "tgw-001bc8550c79f14b9",
+            "TransitGatewayArn": "arn:aws:ec2:us-east-1:***:transit-gateway/tgw-001bc8550c79f14b9",
+            "State": "available",
+            "OwnerId": "***",
+            "Description": "Transit Gateway for VPC interconnect",
+            "CreationTime": "2025-07-09T04:11:42+00:00",
+            "Options": {
+                "AmazonSideAsn": 64512,
+                "AutoAcceptSharedAttachments": "enable",
+                "DefaultRouteTableAssociation": "enable",
+                "AssociationDefaultRouteTableId": "tgw-rtb-0d450d799e35a6419",
+                "DefaultRouteTablePropagation": "enable",
+                "PropagationDefaultRouteTableId": "tgw-rtb-0d450d799e35a6419",
+                "VpnEcmpSupport": "enable",
+                "DnsSupport": "enable",
+                "SecurityGroupReferencingSupport": "disable",
+                "MulticastSupport": "disable"
+            },
+            "Tags": [
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-TransitGateway"
+                }
+            ]
+        },
+        {
+            "TransitGatewayId": "tgw-003341345b1d27cba",
+            "TransitGatewayArn": "arn:aws:ec2:us-east-1:***:transit-gateway/tgw-003341345b1d27cba",
+            "State": "deleted",
+            "OwnerId": "***",
+            "Description": "Transit Gateway for VPC interconnect",
+            "CreationTime": "2025-07-09T02:56:45+00:00",
+            "Options": {
+                "AmazonSideAsn": 64512,
+                "AutoAcceptSharedAttachments": "enable",
+                "DefaultRouteTableAssociation": "enable",
+                "AssociationDefaultRouteTableId": "tgw-rtb-00ab736309a7e1777",
+                "DefaultRouteTablePropagation": "enable",
+                "PropagationDefaultRouteTableId": "tgw-rtb-00ab736309a7e1777",
+                "VpnEcmpSupport": "enable",
+                "DnsSupport": "enable",
+                "SecurityGroupReferencingSupport": "disable",
+                "MulticastSupport": "disable"
+            },
+            "Tags": [
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-TransitGateway"
+                }
+            ]
+        }
+    ]
+}

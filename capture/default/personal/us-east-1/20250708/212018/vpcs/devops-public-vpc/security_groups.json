@@ -1,0 +1,164 @@
+{
+    "SecurityGroups": [
+        {
+            "GroupId": "sg-0b554ea1beb59c034",
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "-1",
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ],
+            "Tags": [
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "BastionRemoteAccessSG"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-RemoteAccessSG"
+                }
+            ],
+            "VpcId": "vpc-028b2dc2728406fd9",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-1:***:security-group/sg-0b554ea1beb59c034",
+            "OwnerId": "***",
+            "GroupName": "network-mapping-BastionRemoteAccessSG-diMC6pIwW4kG",
+            "Description": "Allow SSH from Remote IP to Public EC2",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 22,
+                    "ToPort": 22,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "104.28.111.171/32"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        },
+        {
+            "GroupId": "sg-0a5369bfe8178b904",
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 443,
+                    "ToPort": 443,
+                    "UserIdGroupPairs": [
+                        {
+                            "UserId": "***",
+                            "GroupId": "sg-0cdf97b87f269a5a2",
+                            "VpcId": "vpc-0dd98b0cb5d3ded56",
+                            "VpcPeeringConnectionId": "pcx-0b2f7050573bcea16",
+                            "PeeringStatus": "active"
+                        }
+                    ],
+                    "IpRanges": [],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ],
+            "Tags": [
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-EC2Instance-SG"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-id",
+                    "Value": "arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+                },
+                {
+                    "Key": "aws:cloudformation:stack-name",
+                    "Value": "network-mapping"
+                },
+                {
+                    "Key": "aws:cloudformation:logical-id",
+                    "Value": "EC2InstanceSecurityGroup"
+                }
+            ],
+            "VpcId": "vpc-028b2dc2728406fd9",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-1:***:security-group/sg-0a5369bfe8178b904",
+            "OwnerId": "***",
+            "GroupName": "network-mapping-EC2InstanceSecurityGroup-zHu59SlBh4tM",
+            "Description": "Allow public EC2 to access private EC2",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 22,
+                    "ToPort": 22,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "10.0.0.0/16"
+                        },
+                        {
+                            "CidrIp": "10.1.0.0/16"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        },
+        {
+            "GroupId": "sg-0c5a524d10af6efe9",
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "-1",
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ],
+            "VpcId": "vpc-028b2dc2728406fd9",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-1:***:security-group/sg-0c5a524d10af6efe9",
+            "OwnerId": "***",
+            "GroupName": "default",
+            "Description": "default VPC security group",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "-1",
+                    "UserIdGroupPairs": [
+                        {
+                            "UserId": "***",
+                            "GroupId": "sg-0c5a524d10af6efe9"
+                        }
+                    ],
+                    "IpRanges": [],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        }
+    ]
+}

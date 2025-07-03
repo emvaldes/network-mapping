@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+
+#------------------------------------------------------------------------------
+# security_groups
+#
+# Queries all Security Groups in the specified VPC and saves the result to a JSON file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+#
+# Output File:
+#   - security_groups.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function security_groups () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-security-groups \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=vpc-id,Values=${vpc_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias security-groups='security_groups';
+
+#------------------------------------------------------------------------------
+# security_groups_unattached
+#
+# Identifies all Security Groups in a given VPC that are not attached to any
+# network interface. Saves the unattached groups to a JSON file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+#
+# Output File:
+#   - unattached_security_groups.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function security_groups_unattached () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    local tmp_dir="$( mktemp -d )";
+    local security_groups="${tmp_dir}/security_groups.json";
+
+    ## Capture all security groups in the VPC
+    aws ec2 describe-security-groups \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=vpc-id,Values=${vpc_id}" \
+        --output "${output_format}" \
+    > "${security_groups}";
+
+    ## Capture all SGs attached to network interfaces in the VPC
+    local attached_sgs=$(
+      aws ec2 describe-network-interfaces \
+          --profile "${target_profile}" \
+          --region "${target_region}" \
+          --filters "Name=vpc-id,Values=${vpc_id}" \
+          --query 'NetworkInterfaces[].Groups[].GroupId' \
+          --output text | tr '\t' '\n' | sort -u
+    );
+
+    ## Identify SGs not present in attached_sgs
+    jq -r '.SecurityGroups[].GroupId' "${security_groups}" | \
+    while read -r sg_id; do
+
+        if ! grep -q "${sg_id}" <<< "${attached_sgs}"; then
+            jq --arg sg "${sg_id}" \
+               '.SecurityGroups[] | select(.GroupId == $sg)' \
+               "${security_groups}";
+        fi;
+
+    done | jq -s . > "${output_file}";
+
+    rm -rf "${tmp_dir}";
+
+    return 0;
+
+}; alias security-groups-unattached='security_groups_unattached';
+
+#------------------------------------------------------------------------------
+# vpc_network_acls
+#
+# Queries all Network ACLs (NACLs) in a specific VPC and saves them to a JSON file.
+#
+# Parameters:
+#   - 1: Output file path
+#   - 2: VPC ID
+#
+# Output File:
+#   - network_acls.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function vpc_network_acls () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+    [[ -n ${2:-} ]] && local vpc_id="${2}" || return 1;
+
+    aws ec2 describe-network-acls \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --filters "Name=vpc-id,Values=${vpc_id}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+
+}; alias vpc-network-acls='vpc_network_acls';
+
+#------------------------------------------------------------------------------
+# iam_caller_identity
+#
+# Retrieves the AWS account identity for the current session.
+# Includes:
+#   - AWS Account ID
+#   - IAM User or Role ARN
+#   - Caller User ID
+#
+# Always queries the AWS STS service and overwrites the output file.
+#
+# Parameters:
+#   - 1: Output file path
+#
+# Output File:
+#   - caller_identity.json (or as named by caller)
+#------------------------------------------------------------------------------
+
+function iam_caller_identity () {
+
+    [[ -n ${1:-} ]] && local output_file="${1}" || return 1;
+
+    aws sts get-caller-identity \
+        --profile "${target_profile}" \
+        --region "${target_region}" \
+        --output "${output_format}" \
+    > "${output_file}";
+
+    return 0;
+}; alias iam-caller-identity='iam_caller_identity';

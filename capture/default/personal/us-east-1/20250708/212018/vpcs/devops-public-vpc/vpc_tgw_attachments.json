@@ -1,0 +1,28 @@
+{
+    "TransitGatewayAttachments": [
+        {
+            "TransitGatewayAttachmentId": "tgw-attach-0189b5caa6e869108",
+            "TransitGatewayId": "tgw-001bc8550c79f14b9",
+            "TransitGatewayOwnerId": "***",
+            "ResourceOwnerId": "***",
+            "ResourceType": "vpc",
+            "ResourceId": "vpc-028b2dc2728406fd9",
+            "State": "available",
+            "Association": {
+                "TransitGatewayRouteTableId": "tgw-rtb-0d450d799e35a6419",
+                "State": "associated"
+            },
+            "CreationTime": "2025-07-09T04:12:45+00:00",
+            "Tags": [
+                {
+                    "Key": "DevOps",
+                    "Value": "true"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "DevOps-TGWAttachment-Public"
+                }
+            ]
+        }
+    ]
+}

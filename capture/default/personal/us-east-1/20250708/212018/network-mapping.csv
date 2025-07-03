@@ -1,0 +1,4 @@
+"vpc","subnet","cidr"
+"devops-locked-vpc","devops-locked-subnet","10.2.1.0/24"
+"devops-private-vpc","devops-private-subnet","10.1.1.0/24"
+"devops-public-vpc","devops-public-subnet","10.0.1.0/24"

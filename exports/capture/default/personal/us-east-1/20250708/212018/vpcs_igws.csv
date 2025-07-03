@@ -1,0 +1,2 @@
+VPC,InternetGatewayId,OwnerId,AttachmentVpcId,AttachmentState,Tags
+"devops-public-vpc","igw-00c373c8feb8a9fc9","***","vpc-028b2dc2728406fd9","available","aws:cloudformation:logical-id=InternetGateway;aws:cloudformation:stack-name=network-mapping;DevOps=true;Name=DevOps-IGW;aws:cloudformation:stack-id=arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
