@@ -1,4 +1,16 @@
-VPC,Subnet,InstanceId,State,SubnetId,VpcId,PrivateIpAddress,PublicIpAddress,IamRole,SsmPingStatus,PlatformName,Name,DevOps
-"devops-locked-vpc","devops-locked-subnet","i-0cfc29aca7e1130c3","running","subnet-0a7863c4791ae49f2","vpc-0f7fa8fdff02da590","10.2.1.191","-","arn:aws:iam::***:instance-profile/network-mapping-SSMInstanceProfile-mcP8cbDL9bZW","Online","Amazon Linux","DevOps-EC2-DevOps","true"
-"devops-private-vpc","devops-private-subnet","i-07dd74937c817548b","running","subnet-0ebc71f9acbeba83c","vpc-0dd98b0cb5d3ded56","10.1.1.106","-","arn:aws:iam::***:instance-profile/network-mapping-SSMInstanceProfile-mcP8cbDL9bZW","Online","Amazon Linux","DevOps-EC2-Private","true"
-"devops-public-vpc","devops-public-subnet","i-0e64cbd9718ff9743","running","subnet-03ea1805ea65cba01","vpc-028b2dc2728406fd9","10.0.1.18","3.213.170.119","arn:aws:iam::***:instance-profile/network-mapping-SSMInstanceProfile-mcP8cbDL9bZW","Online","Amazon Linux","DevOps-EC2-Public","true"
+VPC,Subnet,InstanceId,State,SubnetId,VpcId,PrivateIpAddress,PublicIpAddress,IamRole,SsmPingStatus,PlatformName,Tags
+"devops-locked-vpc","devops-locked-subnet","i-0cfc29aca7e1130c3","running","subnet-0a7863c4791ae49f2","vpc-0f7fa8fdff02da590","10.2.1.191","-","arn:aws:iam::***:instance-profile/network-mapping-SSMInstanceProfile-mcP8cbDL9bZW","Online","Amazon Linux","Name=DevOps-EC2-DevOps
+aws:cloudformation:stack-name=network-mapping
+aws:cloudformation:stack-id=arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d
+DevOps=true
+aws:cloudformation:logical-id=EC2DevOpsInstance"
+"devops-private-vpc","devops-private-subnet","i-07dd74937c817548b","running","subnet-0ebc71f9acbeba83c","vpc-0dd98b0cb5d3ded56","10.1.1.106","-","arn:aws:iam::***:instance-profile/network-mapping-SSMInstanceProfile-mcP8cbDL9bZW","Online","Amazon Linux","Name=DevOps-EC2-Private
+aws:cloudformation:stack-id=arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d
+DevOps=true
+aws:cloudformation:logical-id=EC2PrivateInstance
+aws:cloudformation:stack-name=network-mapping"
+"devops-public-vpc","devops-public-subnet","i-0e64cbd9718ff9743","running","subnet-03ea1805ea65cba01","vpc-028b2dc2728406fd9","10.0.1.18","3.213.170.119","arn:aws:iam::***:instance-profile/network-mapping-SSMInstanceProfile-mcP8cbDL9bZW","Online","Amazon Linux","DevOps=true
+Name=DevOps-EC2-Public
+aws:cloudformation:stack-name=network-mapping
+aws:cloudformation:logical-id=EC2PublicInstance
+aws:cloudformation:stack-id=arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"

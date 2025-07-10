@@ -1,2 +1,2 @@
-TransitGatewayRouteTableId,TransitGatewayId,State,DefaultAssociationRouteTable,DefaultPropagationRouteTable,CreationTime
-"tgw-rtb-0d450d799e35a6419","tgw-001bc8550c79f14b9","available","true","true","2025-07-09T04:11:45+00:00"
+TransitGatewayRouteTableId,TransitGatewayId,State,DefaultAssociationRouteTable,DefaultPropagationRouteTable,CreationTime,Tags
+"tgw-rtb-0d450d799e35a6419","tgw-001bc8550c79f14b9","available","true","true","2025-07-09T04:11:45+00:00",""

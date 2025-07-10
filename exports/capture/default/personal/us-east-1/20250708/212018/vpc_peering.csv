@@ -1,3 +1,11 @@
 VpcPeeringConnectionId,StatusCode,AccepterVpcId,AccepterOwnerId,AccepterRegion,AccepterCidrBlock,RequesterVpcId,RequesterOwnerId,RequesterRegion,RequesterCidrBlock,AllowDnsResolutionFromRemoteVpc,AllowEgressFromLocalClassicLinkToRemoteVpc,AllowEgressFromLocalVpcToRemoteClassicLink,Tags
-"pcx-0b2f7050573bcea16","active","vpc-0dd98b0cb5d3ded56","***","us-east-1","10.1.0.0/16","vpc-028b2dc2728406fd9","***","us-east-1","10.0.0.0/16","false","false","false","aws:cloudformation:stack-name=network-mapping;aws:cloudformation:logical-id=VPCPeeringConnection;Name=DevOps-VPCPeering-PublicPrivate;DevOps=true;aws:cloudformation:stack-id=arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
-"pcx-01c4be7ca916feee7","deleted","vpc-00833a394354d709d","***","us-east-1","-","vpc-0fb6982d9af6edc12","***","us-east-1","-","null","null","null","aws:cloudformation:stack-id=arn:aws:cloudformation:us-east-1:***:stack/network-mapping/77afa390-5c6f-11f0-992c-123141793963;aws:cloudformation:stack-name=network-mapping;DevOps=true;aws:cloudformation:logical-id=VPCPeeringConnection;Name=DevOps-VPCPeering-PublicPrivate"
+"pcx-0b2f7050573bcea16","active","vpc-0dd98b0cb5d3ded56","***","us-east-1","10.1.0.0/16","vpc-028b2dc2728406fd9","***","us-east-1","10.0.0.0/16","false","false","false","aws:cloudformation:stack-name=network-mapping
+aws:cloudformation:logical-id=VPCPeeringConnection
+Name=DevOps-VPCPeering-PublicPrivate
+DevOps=true
+aws:cloudformation:stack-id=arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d"
+"pcx-01c4be7ca916feee7","deleted","vpc-00833a394354d709d","***","us-east-1","-","vpc-0fb6982d9af6edc12","***","us-east-1","-","null","null","null","aws:cloudformation:stack-id=arn:aws:cloudformation:us-east-1:***:stack/network-mapping/77afa390-5c6f-11f0-992c-123141793963
+aws:cloudformation:stack-name=network-mapping
+DevOps=true
+aws:cloudformation:logical-id=VPCPeeringConnection
+Name=DevOps-VPCPeering-PublicPrivate"

@@ -1,4 +1,8 @@
-VPC,NetworkInterfaceId,PrivateIpAddress,PublicIp,SubnetId,VpcId,Status,Description,InterfaceType
-"devops-locked-vpc","eni-04ab9e057532facfe","10.2.1.191","-","subnet-0a7863c4791ae49f2","vpc-0f7fa8fdff02da590","in-use","","interface"
-"devops-private-vpc","eni-0c8b54225a4b22f49","10.1.1.106","-","subnet-0ebc71f9acbeba83c","vpc-0dd98b0cb5d3ded56","in-use","","interface"
-"devops-public-vpc","eni-03fd376cea628ecb2","10.0.1.18","3.213.170.119","subnet-03ea1805ea65cba01","vpc-028b2dc2728406fd9","in-use","Bastion ENI for Public Subnet","interface"
+VPC,NetworkInterfaceId,PrivateIpAddress,PublicIp,SubnetId,VpcId,Status,Description,InterfaceType,Tags
+"devops-locked-vpc","eni-04ab9e057532facfe","10.2.1.191","-","subnet-0a7863c4791ae49f2","vpc-0f7fa8fdff02da590","in-use","","interface",""
+"devops-private-vpc","eni-0c8b54225a4b22f49","10.1.1.106","-","subnet-0ebc71f9acbeba83c","vpc-0dd98b0cb5d3ded56","in-use","","interface",""
+"devops-public-vpc","eni-03fd376cea628ecb2","10.0.1.18","3.213.170.119","subnet-03ea1805ea65cba01","vpc-028b2dc2728406fd9","in-use","Bastion ENI for Public Subnet","interface","aws:cloudformation:logical-id=BastionENI
+Name=DevOps-BastionENI
+aws:cloudformation:stack-id=arn:aws:cloudformation:us-east-1:***:stack/network-mapping/abc89460-5c7a-11f0-9326-0affc332652d
+aws:cloudformation:stack-name=network-mapping
+DevOps=true"

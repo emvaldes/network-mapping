@@ -1,4 +1,4 @@
-VPC,Subnet,DestinationCidrBlock,GatewayId,Origin,State
-"devops-locked-vpc","devops-locked-subnet","0.0.0.0/0","-","CreateRoute","active"
-"devops-private-vpc","devops-private-subnet","0.0.0.0/0","-","CreateRoute","active"
-"devops-public-vpc","devops-public-subnet","0.0.0.0/0","igw-00c373c8feb8a9fc9","CreateRoute","active"
+VPC,Subnet,DestinationCidrBlock,GatewayId,Origin,State,Tags
+"devops-locked-vpc","devops-locked-subnet","0.0.0.0/0","-","CreateRoute","active",""
+"devops-private-vpc","devops-private-subnet","0.0.0.0/0","-","CreateRoute","active",""
+"devops-public-vpc","devops-public-subnet","0.0.0.0/0","igw-00c373c8feb8a9fc9","CreateRoute","active",""

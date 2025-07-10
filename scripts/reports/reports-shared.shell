@@ -30,17 +30,43 @@ echo -e "Exporting CSV files to: ${exports_folder}";
 echo -e;
 
 #------------------------------------------------------------------------------#
-# Report: TGW Advertised Routes - CSV Output
-# Processes each advertised route JSON file under shared/advertised/
-# Extracts:
-# - DestinationCidrBlock, State, Type
-# - TransitGatewayAttachmentId, ResourceId, ResourceType
+# Report Aggregator: Transit Gateway Advertised Routes
+#------------------------------------------------------------------------------
+# Processes each advertised routes JSON file in:
+#   <shared_folder>/advertised/tgw*.json
+#
+# Extracts for each advertised route:
+# - DestinationCidrBlock:               CIDR block of the advertised route
+# - State:                              Route state (available, blackhole)
+# - Type:                               Type of route (static, propagated)
+# - TransitGatewayRouteTableAnnouncementId: ID of the route table announcement
+# - AdditionalRoutesAvailable:          Whether additional routes are available
+# - TransitGatewayAttachmentId:         TGW Attachment ID
+# - ResourceId:                         ID of the attached resource
+# - ResourceType:                       Type of the resource (vpc, vpn, etc.)
+# - Tags:                               List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: tgw_advertised_routes.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_tgw_advertised_routes () {
 
     local output_file="${exports_folder}/tgw_advertised_routes.csv";
     : > "${output_file}";
+
+    local headers=(
+      DestinationCidrBlock
+      State
+      Type
+      TransitGatewayRouteTableAnnouncementId
+      AdditionalRoutesAvailable
+      TransitGatewayAttachmentId
+      ResourceId
+      ResourceType
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for target_file in "${shared_folder}/advertised"/tgw*.json; do
       if [[ ! -f "${target_file}" ]]; then
@@ -49,31 +75,24 @@ function report_tgw_advertised_routes () {
         else  echo -e "\nProcessing: ${target_file}";
       fi;
 
-      ## Define the CSV headers as an array
-      local headers=(
-        DestinationCidrBlock
-        State
-        Type
-        TransitGatewayRouteTableAnnouncementId
-        AdditionalRoutesAvailable
-        TransitGatewayAttachmentId
-        ResourceId
-        ResourceType
-      ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
-
       jq -r '
         (.Routes // [])[] as $route
         | ($route.TransitGatewayAttachments // [{}])[] as $attach
         | [
-            ($route.DestinationCidrBlock // "-"),
-            ($route.State // "-"),
-            ($route.Type // "-"),
-            ($route.TransitGatewayRouteTableAnnouncementId // "-"),
-            (.AdditionalRoutesAvailable // "-"),
-            ($attach.TransitGatewayAttachmentId // "-"),
-            ($attach.ResourceId // "-"),
-            ($attach.ResourceType // "-")
-          ] | @csv
+          ($route.DestinationCidrBlock // "-"),
+          ($route.State // "-"),
+          ($route.Type // "-"),
+          ($route.TransitGatewayRouteTableAnnouncementId // "-"),
+          ($route.AdditionalRoutesAvailable | tostring // "-"),
+          ($attach.TransitGatewayAttachmentId // "-"),
+          ($attach.ResourceId // "-"),
+          ($attach.ResourceType // "-"),
+          (
+            ( $route.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          )
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -81,18 +100,33 @@ function report_tgw_advertised_routes () {
 }; alias report-tgw-advertised-routes='report_tgw_advertised_routes';
 
 #------------------------------------------------------------------------------#
-# Report: TGW Associated Routes - CSV Output (Expanded)
-# Processes each associated route JSON file under shared/associated/
-# Extracts:
-# - DestinationCidrBlock, State, Type
-# - TransitGatewayRouteTableAnnouncementId, AdditionalRoutesAvailable
-# - TransitGatewayAttachmentId, ResourceId, ResourceType
+# Report Aggregator: Transit Gateway Associated Routes
+#------------------------------------------------------------------------------
+# Processes each associated routes JSON file in:
+#   <shared_folder>/associated/tgw*.json
+#
+# Extracts for each association:
+# - TransitGatewayAttachmentId
+# - ResourceId
+# - ResourceType
+# - State
+#
+# Output CSV:
+# - Filename: tgw_associated_routes.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_tgw_associated_routes () {
 
     local output_file="${exports_folder}/tgw_associated_routes.csv";
     : > "${output_file}";
+
+    local headers=(
+      TransitGatewayAttachmentId
+      ResourceId
+      ResourceType
+      State
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for target_file in "${shared_folder}/associated"/tgw*.json; do
       if [[ ! -f "${target_file}" ]]; then
@@ -101,21 +135,13 @@ function report_tgw_associated_routes () {
         else  echo -e "\nProcessing: ${target_file}";
       fi;
 
-      ## Define the CSV headers as an array
-      local headers=(
-        TransitGatewayAttachmentId
-        ResourceId
-        ResourceType
-        State
-      ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
-
       jq -r '
         (.Associations // [])[] |
         [
-            (.TransitGatewayAttachmentId // "-"),
-            (.ResourceId // "-"),
-            (.ResourceType // "-"),
-            (.State // "-")
+          (.TransitGatewayAttachmentId // "-"),
+          (.ResourceId // "-"),
+          (.ResourceType // "-"),
+          (.State // "-")
         ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
@@ -124,16 +150,33 @@ function report_tgw_associated_routes () {
 }; alias report-tgw-associated-routes='report_tgw_associated_routes';
 
 #------------------------------------------------------------------------------#
-# Report: TGW Propagated Routes - CSV Output (Corrected)
-# Processes each propagated route JSON file under shared/propagated/
-# Extracts:
-# - TransitGatewayAttachmentId, ResourceId, ResourceType, State
+# Report Aggregator: Transit Gateway Propagated Routes
+#------------------------------------------------------------------------------
+# Processes each propagated routes JSON file in:
+#   <shared_folder>/propagated/tgw*.json
+#
+# Extracts for each propagated attachment:
+# - TransitGatewayAttachmentId:  TGW Attachment ID
+# - ResourceId:                  ID of the attached resource
+# - ResourceType:                Type of the resource (vpc, vpn, etc.)
+# - State:                       Propagation state (enabled, disabled)
+#
+# Output CSV:
+# - Filename: tgw_propagated_routes.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_tgw_propagated_routes () {
 
     local output_file="${exports_folder}/tgw_propagated_routes.csv";
     : > "${output_file}";
+
+    local headers=(
+      TransitGatewayAttachmentId
+      ResourceId
+      ResourceType
+      State
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for target_file in "${shared_folder}/propagated"/tgw*.json; do
       if [[ ! -f "${target_file}" ]]; then
@@ -142,21 +185,13 @@ function report_tgw_propagated_routes () {
         else  echo -e "\nProcessing: ${target_file}";
       fi;
 
-      ## Define the CSV headers as an array
-      local headers=(
-        TransitGatewayAttachmentId
-        ResourceId
-        ResourceType
-        State
-      ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
-
       jq -r '
         (.TransitGatewayRouteTablePropagations // [])[] |
         [
-            (.TransitGatewayAttachmentId // "-"),
-            (.ResourceId // "-"),
-            (.ResourceType // "-"),
-            (.State // "-")
+          (.TransitGatewayAttachmentId // "-"),
+          (.ResourceId // "-"),
+          (.ResourceType // "-"),
+          (.State // "-")
         ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
@@ -202,10 +237,21 @@ function report_caller_identity () {
 }; alias report-caller-identity='report_caller_identity';
 
 #------------------------------------------------------------------------------#
-# Report: Elastic IPs - CSV Output
-# Processes the shared/elastic_ips.json file
-# Extracts:
-# - PublicIp, AllocationId, AssociatedInstance, AssociatedNetworkInterface
+# Report Aggregator: Elastic IPs
+#------------------------------------------------------------------------------
+# Processes the shared elastic IPs JSON file:
+#   <shared_folder>/elastic_ips.json
+#
+# Extracts for each Elastic IP:
+# - PublicIp:                     Elastic Public IP address
+# - AllocationId:                  Allocation ID for the EIP
+# - AssociatedInstance:            Associated EC2 Instance ID
+# - AssociatedNetworkInterface:    Associated ENI ID
+# - Tags:                          List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: elastic_ips.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_elastic_ips () {
@@ -220,13 +266,13 @@ function report_elastic_ips () {
       else  echo -e "\nProcessing: ${target_file}";
     fi;
 
-    ## Define the CSV headers as an array
     local headers=(
       PublicIp
       AllocationId
       AssociatedInstance
       AssociatedNetworkInterface
-    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     jq -r '
       .[]? |
@@ -234,7 +280,12 @@ function report_elastic_ips () {
         (.PublicIp // "-"),
         (.AllocationId // "-"),
         (.AssociatedInstance // "-"),
-        (.AssociatedNetworkInterface // "-")
+        (.AssociatedNetworkInterface // "-"),
+        (
+          ( .Tags // [] )
+          | map( "\(.Key)=\(.Value)" )
+          | join( "\n" )
+        )
       ] | @csv
     ' "${target_file}" | tee -a "${output_file}";
 
@@ -311,10 +362,23 @@ function report_managed_instances () {
 }; alias report-managed-instances='report_managed_instances';
 
 #------------------------------------------------------------------------------#
-# Report: Prefix Lists - CSV Output
-# Processes the shared/prefix_lists.json file
-# Extracts:
-# - PrefixListId, PrefixListName, AddressFamily, State, PrefixListArn, OwnerId
+# Report Aggregator: Prefix Lists
+#------------------------------------------------------------------------------
+# Processes the shared prefix_lists.json file:
+#   <shared_folder>/prefix_lists.json
+#
+# Extracts for each Prefix List:
+# - PrefixListId:   Prefix List ID
+# - PrefixListName: Prefix List name
+# - AddressFamily:  IPv4 or IPv6
+# - State:          State of the Prefix List
+# - PrefixListArn:  Full ARN of the Prefix List
+# - OwnerId:        AWS Account Owner ID
+# - Tags:           List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: prefix_lists.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_prefix_lists () {
@@ -329,7 +393,6 @@ function report_prefix_lists () {
       else  echo -e "\nProcessing: ${target_file}";
     fi;
 
-    ## Define the CSV headers as an array
     local headers=(
       PrefixListId
       PrefixListName
@@ -337,7 +400,8 @@ function report_prefix_lists () {
       State
       PrefixListArn
       OwnerId
-    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     jq -r '
       .PrefixLists[]? |
@@ -347,7 +411,12 @@ function report_prefix_lists () {
         (.AddressFamily // "-"),
         (.State // "-"),
         (.PrefixListArn // "-"),
-        (.OwnerId // "-")
+        (.OwnerId // "-"),
+        (
+          ( .Tags // [] )
+          | map( "\(.Key)=\(.Value)" )
+          | join( "\n" )
+        )
       ] | @csv
     ' "${target_file}" | tee -a "${output_file}";
 
@@ -355,11 +424,23 @@ function report_prefix_lists () {
 }; alias report-prefix-lists='report_prefix_lists';
 
 #------------------------------------------------------------------------------#
-# Report: TGW Route Tables - CSV Output
-# Processes the shared/tgw_route_tables.json file
-# Extracts:
-# - TransitGatewayRouteTableId, TransitGatewayId, State,
-#   DefaultAssociationRouteTable, DefaultPropagationRouteTable, CreationTime
+# Report Aggregator: Transit Gateway Route Tables
+#------------------------------------------------------------------------------
+# Processes the shared tgw_route_tables.json file:
+#   <shared_folder>/tgw_route_tables.json
+#
+# Extracts for each TGW Route Table:
+# - TransitGatewayRouteTableId:   TGW Route Table ID
+# - TransitGatewayId:             TGW ID
+# - State:                        State of the route table (available, deleted)
+# - DefaultAssociationRouteTable: Whether it is the default association route table
+# - DefaultPropagationRouteTable: Whether it is the default propagation route table
+# - CreationTime:                 Creation timestamp
+# - Tags:                         List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: tgw_route_tables.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_tgw_route_tables () {
@@ -374,7 +455,6 @@ function report_tgw_route_tables () {
       else  echo -e "\nProcessing: ${target_file}";
     fi;
 
-    ## Define the CSV headers as an array
     local headers=(
       TransitGatewayRouteTableId
       TransitGatewayId
@@ -382,7 +462,8 @@ function report_tgw_route_tables () {
       DefaultAssociationRouteTable
       DefaultPropagationRouteTable
       CreationTime
-    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     jq -r '
       .[]? |
@@ -392,7 +473,12 @@ function report_tgw_route_tables () {
         (.State // "-"),
         (.DefaultAssociationRouteTable | tostring // "-"),
         (.DefaultPropagationRouteTable | tostring // "-"),
-        (.CreationTime // "-")
+        (.CreationTime // "-"),
+        (
+          ( .Tags // [] )
+          | map( "\(.Key)=\(.Value)" )
+          | join( "\n" )
+        )
       ] | @csv
     ' "${target_file}" | tee -a "${output_file}";
 
@@ -400,12 +486,33 @@ function report_tgw_route_tables () {
 }; alias report-tgw-route-tables='report_tgw_route_tables';
 
 #------------------------------------------------------------------------------#
-# Report: Transit Gateways - CSV Output
-# Processes the shared/transit_gateways.json file
-# Extracts:
-# - TransitGatewayId, TransitGatewayArn, State, OwnerId, Description, CreationTime
-# - Options (AmazonSideAsn, AutoAcceptSharedAttachments, etc.)
-# - Tags (concatenated as key=value pairs)
+# Report Aggregator: Transit Gateways
+#------------------------------------------------------------------------------
+# Processes the shared transit_gateways.json file:
+#   <shared_folder>/transit_gateways.json
+#
+# Extracts for each Transit Gateway:
+# - TransitGatewayId:                    Transit Gateway ID
+# - TransitGatewayArn:                   Full ARN
+# - State:                               State of the Transit Gateway
+# - OwnerId:                             AWS Account Owner ID
+# - Description:                         Transit Gateway description
+# - CreationTime:                        Creation timestamp
+# - Options.AmazonSideAsn:               ASN number assigned by AWS
+# - Options.AutoAcceptSharedAttachments: Auto-accept attachments setting
+# - Options.DefaultRouteTableAssociation: Default association setting
+# - Options.AssociationDefaultRouteTableId: Default association RT ID
+# - Options.DefaultRouteTablePropagation: Default propagation setting
+# - Options.PropagationDefaultRouteTableId: Default propagation RT ID
+# - Options.VpnEcmpSupport:              VPN ECMP support
+# - Options.DnsSupport:                  DNS support setting
+# - Options.SecurityGroupReferencingSupport: SG referencing support
+# - Options.MulticastSupport:            Multicast support
+# - Tags:                                List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: transit_gateways.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_transit_gateways () {
@@ -420,7 +527,6 @@ function report_transit_gateways () {
       else  echo -e "\nProcessing: ${target_file}";
     fi;
 
-    ## Define the CSV headers as an array
     local headers=(
       TransitGatewayId
       TransitGatewayArn
@@ -439,7 +545,7 @@ function report_transit_gateways () {
       SecurityGroupReferencingSupport
       MulticastSupport
       Tags
-    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     jq -r '
       .TransitGateways[]? |
@@ -461,8 +567,9 @@ function report_transit_gateways () {
         (.Options.SecurityGroupReferencingSupport // "-"),
         (.Options.MulticastSupport // "-"),
         (
-          (.Tags // [])
-          | map("\(.Key)=\(.Value)") | join(";")
+          ( .Tags // [] )
+          | map( "\(.Key)=\(.Value)" )
+          | join( "\n" )
         )
       ] | @csv
     ' "${target_file}" | tee -a "${output_file}";
@@ -471,11 +578,26 @@ function report_transit_gateways () {
 }; alias report-transit-gateways='report_transit_gateways';
 
 #------------------------------------------------------------------------------#
-# Report: VPC Peering - CSV Output
-# Processes the shared/vpc_peering.json file
-# Extracts:
-# - VpcPeeringConnectionId, Status.Code, Accepter/Requester VPC details,
-#   Peering options, Regions, and concatenated Tags.
+# Report Aggregator: VPC Peering Connections
+#------------------------------------------------------------------------------
+# Processes the shared vpc_peering.json file:
+#   <shared_folder>/vpc_peering.json
+#
+# Extracts for each VPC Peering Connection:
+# - VpcPeeringConnectionId:                           Peering connection ID
+# - StatusCode:                                       Status code (active, pending, etc.)
+# - AccepterVpcId, AccepterOwnerId, AccepterRegion:   Accepter VPC details
+# - AccepterCidrBlock:                                CIDR block of the accepter VPC
+# - RequesterVpcId, RequesterOwnerId, RequesterRegion: Requester VPC details
+# - RequesterCidrBlock:                               CIDR block of the requester VPC
+# - AllowDnsResolutionFromRemoteVpc:                  Peering options
+# - AllowEgressFromLocalClassicLinkToRemoteVpc:
+# - AllowEgressFromLocalVpcToRemoteClassicLink:
+# - Tags:                                             List of tags in "Key=Value" format, separated by semicolons
+#
+# Output CSV:
+# - Filename: vpc_peering.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_vpc_peering () {
@@ -490,7 +612,6 @@ function report_vpc_peering () {
       else  echo -e "\nProcessing: ${target_file}";
     fi;
 
-    ## Define the CSV headers as an array
     local headers=(
       VpcPeeringConnectionId
       StatusCode
@@ -506,7 +627,7 @@ function report_vpc_peering () {
       AllowEgressFromLocalClassicLinkToRemoteVpc
       AllowEgressFromLocalVpcToRemoteClassicLink
       Tags
-    ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     jq -r '
       .VpcPeeringConnections[]? |
@@ -525,8 +646,9 @@ function report_vpc_peering () {
         (.RequesterVpcInfo.PeeringOptions.AllowEgressFromLocalClassicLinkToRemoteVpc | tostring // "-"),
         (.RequesterVpcInfo.PeeringOptions.AllowEgressFromLocalVpcToRemoteClassicLink | tostring // "-"),
         (
-          (.Tags // [])
-          | map("\(.Key)=\(.Value)") | join(";")
+          ( .Tags // [] )
+          | map( "\(.Key)=\(.Value)" )
+          | join( "\n" )
         )
       ] | @csv
     ' "${target_file}" | tee -a "${output_file}";
@@ -534,13 +656,15 @@ function report_vpc_peering () {
     return 0;
 }; alias report-vpc-peering='report_vpc_peering';
 
-report_tgw_advertised_routes; echo -e;
-report_tgw_associated_routes; echo -e;
-report_tgw_propagated_routes; echo -e;
+#------------------------------------------------------------------------------#
+
 report_caller_identity; echo -e;
 report_elastic_ips; echo -e;
 report_managed_instances; echo -e;
 report_prefix_lists; echo -e;
+report_tgw_advertised_routes; echo -e;
+report_tgw_associated_routes; echo -e;
+report_tgw_propagated_routes; echo -e;
 report_tgw_route_tables; echo -e;
 report_transit_gateways; echo -e;
 report_vpc_peering; echo -e;

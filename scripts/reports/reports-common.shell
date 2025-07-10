@@ -35,10 +35,24 @@ echo -e "Exporting CSV files to: ${exports_folder}";
 echo -e;
 
 #------------------------------------------------------------------------------#
-# Report: Network Interfaces - CSV Output
+# Report: Network Interfaces - EC2 Instance Interfaces - CSV Output
 # Processes ec2_instances.json under each VPC's interfaces/ folder
+# Each file contains a list of network interfaces (ENIs) for EC2 instances.
 # Extracts:
-# - NetworkInterfaceId, PrivateIpAddress, PublicIp, SubnetId, VpcId, Status, Description, InterfaceType
+# - NetworkInterfaceId, PrivateIpAddress, PublicIp, SubnetId, VpcId,
+#   Status, Description, InterfaceType, Tags
+#
+# CSV Columns:
+# - VPC
+# - NetworkInterfaceId
+# - PrivateIpAddress
+# - PublicIp
+# - SubnetId
+# - VpcId
+# - Status
+# - Description
+# - InterfaceType
+# - Tags (newline-separated Key=Value pairs)
 #------------------------------------------------------------------------------#
 
 function report_interfaces_ec2_instances () {
@@ -57,6 +71,7 @@ function report_interfaces_ec2_instances () {
       Status
       Description
       InterfaceType
+      Tags
     ); IFS=','; echo -e "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
@@ -76,15 +91,20 @@ function report_interfaces_ec2_instances () {
       jq -r --arg vpc "${vpc_folder}" '
         .[] |
         [
-            $vpc,
-            (.NetworkInterfaceId // "-"),
-            (.PrivateIpAddress // "-"),
-            (.Association.PublicIp // "-"),
-            (.SubnetId // "-"),
-            (.VpcId // "-"),
-            (.Status // "-"),
-            (.Description // "-"),
-            (.InterfaceType // "-")
+          $vpc,
+          (.NetworkInterfaceId // "-"),
+          (.PrivateIpAddress // "-"),
+          (.Association.PublicIp // "-"),
+          (.SubnetId // "-"),
+          (.VpcId // "-"),
+          (.Status // "-"),
+          (.Description // "-"),
+          (.InterfaceType // "-"),
+          (
+            ( .TagSet // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          ) // "-"
         ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
@@ -98,7 +118,7 @@ function report_interfaces_ec2_instances () {
 # Each file contains a list of network interfaces (ENIs) representing TGW attachments.
 # Extracts:
 # - NetworkInterfaceId, AttachmentId, Status, SubnetId, VpcId,
-#   PrivateIpAddress, InterfaceType
+#   PrivateIpAddress, InterfaceType, Tags
 #
 # CSV Columns:
 # - VPC
@@ -109,6 +129,7 @@ function report_interfaces_ec2_instances () {
 # - VpcId
 # - PrivateIpAddress
 # - InterfaceType
+# - Tags (newline-separated Key=Value pairs)
 #------------------------------------------------------------------------------#
 
 function report_interfaces_transit_gateway_attachments () {
@@ -126,7 +147,8 @@ function report_interfaces_transit_gateway_attachments () {
       VpcId
       PrivateIpAddress
       InterfaceType
-    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
       local vpc_folder;
@@ -145,14 +167,19 @@ function report_interfaces_transit_gateway_attachments () {
       jq -r --arg vpc "${vpc_folder}" '
         .[]? |
         [
-            $vpc,
-            (.NetworkInterfaceId // "-"),
-            (.Attachment.AttachmentId // "-"),
-            (.Status // "-"),
-            (.SubnetId // "-"),
-            (.VpcId // "-"),
-            (.PrivateIpAddress // "-"),
-            (.InterfaceType // "-")
+          $vpc,
+          (.NetworkInterfaceId // "-"),
+          (.Attachment.AttachmentId // "-"),
+          (.Status // "-"),
+          (.SubnetId // "-"),
+          (.VpcId // "-"),
+          (.PrivateIpAddress // "-"),
+          (.InterfaceType // "-"),
+          (
+            ( .TagSet // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          ) // "-"
         ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
@@ -166,7 +193,7 @@ function report_interfaces_transit_gateway_attachments () {
 # Each file contains a list of network interfaces (ENIs) representing VPC endpoints.
 # Extracts:
 # - NetworkInterfaceId, AttachmentId, Description, Status, SubnetId, VpcId,
-#   PrivateIpAddress, InterfaceType
+#   PrivateIpAddress, InterfaceType, Tags
 #
 # CSV Columns:
 # - VPC
@@ -178,6 +205,7 @@ function report_interfaces_transit_gateway_attachments () {
 # - VpcId
 # - PrivateIpAddress
 # - InterfaceType
+# - Tags (newline-separated Key=Value pairs)
 #------------------------------------------------------------------------------#
 
 function report_interfaces_vpc_endpoints () {
@@ -196,7 +224,8 @@ function report_interfaces_vpc_endpoints () {
       VpcId
       PrivateIpAddress
       InterfaceType
-    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
       local vpc_folder;
@@ -215,15 +244,20 @@ function report_interfaces_vpc_endpoints () {
       jq -r --arg vpc "${vpc_folder}" '
         .[]? |
         [
-            $vpc,
-            (.NetworkInterfaceId // "-"),
-            (.Attachment.AttachmentId // "-"),
-            (.Description // "-"),
-            (.Status // "-"),
-            (.SubnetId // "-"),
-            (.VpcId // "-"),
-            (.PrivateIpAddress // "-"),
-            (.InterfaceType // "-")
+          $vpc,
+          (.NetworkInterfaceId // "-"),
+          (.Attachment.AttachmentId // "-"),
+          (.Description // "-"),
+          (.Status // "-"),
+          (.SubnetId // "-"),
+          (.VpcId // "-"),
+          (.PrivateIpAddress // "-"),
+          (.InterfaceType // "-"),
+          (
+            ( .TagSet // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          ) // "-"
         ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
@@ -237,7 +271,7 @@ function report_interfaces_vpc_endpoints () {
 # Each file contains a list of network interfaces (ENIs) representing NAT gateways.
 # Extracts:
 # - NetworkInterfaceId, AttachmentId, Description, Status, SubnetId, VpcId,
-#   PrivateIpAddress, PublicIp, InterfaceType
+#   PrivateIpAddress, PublicIp, InterfaceType, Tags
 #
 # CSV Columns:
 # - VPC
@@ -250,6 +284,7 @@ function report_interfaces_vpc_endpoints () {
 # - PrivateIpAddress
 # - PublicIp
 # - InterfaceType
+# - Tags (newline-separated Key=Value pairs)
 #------------------------------------------------------------------------------#
 
 function report_interfaces_nat_gateways () {
@@ -269,7 +304,8 @@ function report_interfaces_nat_gateways () {
       PrivateIpAddress
       PublicIp
       InterfaceType
-    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
       local vpc_folder;
@@ -288,16 +324,21 @@ function report_interfaces_nat_gateways () {
       jq -r --arg vpc "${vpc_folder}" '
         .[]? |
         [
-            $vpc,
-            (.NetworkInterfaceId // "-"),
-            (.Attachment.AttachmentId // "-"),
-            (.Description // "-"),
-            (.Status // "-"),
-            (.SubnetId // "-"),
-            (.VpcId // "-"),
-            (.PrivateIpAddress // "-"),
-            (.Association.PublicIp // "-"),
-            (.InterfaceType // "-")
+          $vpc,
+          (.NetworkInterfaceId // "-"),
+          (.Attachment.AttachmentId // "-"),
+          (.Description // "-"),
+          (.Status // "-"),
+          (.SubnetId // "-"),
+          (.VpcId // "-"),
+          (.PrivateIpAddress // "-"),
+          (.Association.PublicIp // "-"),
+          (.InterfaceType // "-"),
+          (
+            ( .TagSet // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          ) // "-"
         ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
@@ -310,7 +351,7 @@ function report_interfaces_nat_gateways () {
 # Processes each default_route_tables.json file under vpcs/*/subnets/*/
 # Each file contains a list of default routes for the subnet.
 # Extracts:
-# - DestinationCidrBlock, GatewayId, Origin, State
+# - DestinationCidrBlock, GatewayId, Origin, State, Tags
 #
 # CSV Columns:
 # - VPC
@@ -319,6 +360,7 @@ function report_interfaces_nat_gateways () {
 # - GatewayId
 # - Origin
 # - State
+# - Tags (newline-separated Key=Value pairs)
 #------------------------------------------------------------------------------#
 
 function report_subnets_default_route_tables () {
@@ -334,7 +376,8 @@ function report_subnets_default_route_tables () {
       GatewayId
       Origin
       State
-    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
       local vpc_folder;
@@ -357,12 +400,17 @@ function report_subnets_default_route_tables () {
         jq -r --arg vpc "${vpc_folder}" --arg subnet "${subnet_folder}" '
           .[]? |
           [
-              $vpc,
-              $subnet,
-              (.DestinationCidrBlock // "-"),
-              (.GatewayId // "-"),
-              (.Origin // "-"),
-              (.State // "-")
+            $vpc,
+            $subnet,
+            (.DestinationCidrBlock // "-"),
+            (.GatewayId // "-"),
+            (.Origin // "-"),
+            (.State // "-"),
+            (
+              ( .Tags // [] )
+              | map( "\(.Key)=\(.Value)" )
+              | join( "\n" )
+            ) // "-"
           ] | @csv
         ' "${target_file}" | tee -a "${output_file}";
       done;
@@ -377,7 +425,7 @@ function report_subnets_default_route_tables () {
 # Each file contains a list of EC2 instances for the subnet.
 # Extracts:
 # - InstanceId, State, SubnetId, VpcId, PrivateIpAddress, PublicIpAddress,
-#   IamRole, SSM PingStatus, PlatformName, Name tag, DevOps tag
+#   IamRole, SSM PingStatus, PlatformName, Tags
 #
 # CSV Columns:
 # - VPC
@@ -391,8 +439,7 @@ function report_subnets_default_route_tables () {
 # - IamRole
 # - SsmPingStatus
 # - PlatformName
-# - Name
-# - DevOps
+# - Tags (newline-separated Key=Value pairs)
 #------------------------------------------------------------------------------#
 
 function report_subnets_ec2_instances () {
@@ -413,9 +460,8 @@ function report_subnets_ec2_instances () {
       IamRole
       SsmPingStatus
       PlatformName
-      Name
-      DevOps
-    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
       local vpc_folder;
@@ -438,19 +484,22 @@ function report_subnets_ec2_instances () {
         jq -r --arg vpc "${vpc_folder}" --arg subnet "${subnet_folder}" '
           .[]? |
           [
-              $vpc,
-              $subnet,
-              (.InstanceId // "-"),
-              (.State // "-"),
-              (.SubnetId // "-"),
-              (.VpcId // "-"),
-              (.PrivateIpAddress // "-"),
-              (.PublicIpAddress // "-"),
-              (.IamRole // "-"),
-              (.SSM.PingStatus // "-"),
-              (.SSM.PlatformName // "-"),
-              (.Tags[]? | select(.Key == "Name") | .Value) // "-",
-              (.Tags[]? | select(.Key == "DevOps") | .Value) // "-"
+            $vpc,
+            $subnet,
+            (.InstanceId // "-"),
+            (.State // "-"),
+            (.SubnetId // "-"),
+            (.VpcId // "-"),
+            (.PrivateIpAddress // "-"),
+            (.PublicIpAddress // "-"),
+            (.IamRole // "-"),
+            (.SSM.PingStatus // "-"),
+            (.SSM.PlatformName // "-"),
+            (
+              ( .Tags // [] )
+              | map( "\(.Key)=\(.Value)" )
+              | join( "\n" )
+            ) // "-"
           ] | @csv
         ' "${target_file}" | tee -a "${output_file}";
       done;
@@ -465,7 +514,7 @@ function report_subnets_ec2_instances () {
 # Each file contains a RouteTables array with Routes and Associations.
 # Extracts for each Route:
 # - RouteTableId, DestinationCidrBlock, GatewayId, VpcPeeringConnectionId,
-#   Origin, State, AssociatedSubnetId, RouteTable Name tag, DevOps tag
+#   Origin, State, AssociatedSubnetId, Tags
 #
 # CSV Columns:
 # - VPC
@@ -477,8 +526,7 @@ function report_subnets_ec2_instances () {
 # - Origin
 # - State
 # - AssociatedSubnetId
-# - Name
-# - DevOps
+# - Tags (newline-separated Key=Value pairs)
 #------------------------------------------------------------------------------#
 
 function report_subnets_subnet_route_tables () {
@@ -497,9 +545,8 @@ function report_subnets_subnet_route_tables () {
       Origin
       State
       AssociatedSubnetId
-      Name
-      DevOps
-    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
       local vpc_folder;
@@ -523,17 +570,20 @@ function report_subnets_subnet_route_tables () {
           .RouteTables[]? as $rtb |
           $rtb.Routes[]? as $route |
           [
-              $vpc,
-              $subnet,
-              ($rtb.RouteTableId // "-"),
-              ($route.DestinationCidrBlock // "-"),
-              ($route.GatewayId // "-"),
-              ($route.VpcPeeringConnectionId // "-"),
-              ($route.Origin // "-"),
-              ($route.State // "-"),
-              ($rtb.Associations[]? | select(.SubnetId != null) | .SubnetId) // "-",
-              ($rtb.Tags[]? | select(.Key == "Name") | .Value) // "-",
-              ($rtb.Tags[]? | select(.Key == "DevOps") | .Value) // "-"
+            $vpc,
+            $subnet,
+            ($rtb.RouteTableId // "-"),
+            ($route.DestinationCidrBlock // "-"),
+            ($route.GatewayId // "-"),
+            ($route.VpcPeeringConnectionId // "-"),
+            ($route.Origin // "-"),
+            ($route.State // "-"),
+            ($rtb.Associations[]? | select(.SubnetId != null) | .SubnetId) // "-",
+            (
+              ( $rtb.Tags // [] )
+              | map( "\(.Key)=\(.Value)" )
+              | join( "\n" )
+            ) // "-"
           ] | @csv
         ' "${target_file}" | tee -a "${output_file}";
       done;
@@ -548,7 +598,7 @@ function report_subnets_subnet_route_tables () {
 # Each file contains metadata describing a single subnet.
 # Extracts:
 # - SubnetId, VpcId, CidrBlock, AvailabilityZone, AvailableIpAddressCount,
-#   MapPublicIpOnLaunch, DefaultForAz, State, Name tag, DevOps tag
+#   MapPublicIpOnLaunch, DefaultForAz, State, Tags
 #
 # CSV Columns:
 # - VPC
@@ -561,8 +611,7 @@ function report_subnets_subnet_route_tables () {
 # - MapPublicIpOnLaunch
 # - DefaultForAz
 # - State
-# - Name
-# - DevOps
+# - Tags (newline-separated Key=Value pairs)
 #------------------------------------------------------------------------------#
 
 function report_subnets_metadata () {
@@ -582,9 +631,8 @@ function report_subnets_metadata () {
       MapPublicIpOnLaunch
       DefaultForAz
       State
-      Name
-      DevOps
-    ); IFS=','; echo "${headers[*]}" | tee -a "${output_file}";
+      Tags
+    ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
       local vpc_folder;
@@ -606,18 +654,21 @@ function report_subnets_metadata () {
 
         jq -r --arg vpc "${vpc_folder}" --arg subnet "${subnet_folder}" '
           [
-              $vpc,
-              $subnet,
-              (.SubnetId // "-"),
-              (.VpcId // "-"),
-              (.CidrBlock // "-"),
-              (.AvailabilityZone // "-"),
-              (.AvailableIpAddressCount // "-"),
-              (.MapPublicIpOnLaunch | tostring // "-"),
-              (.DefaultForAz | tostring // "-"),
-              (.State // "-"),
-              (.Tags[]? | select(.Key == "Name") | .Value) // "-",
-              (.Tags[]? | select(.Key == "DevOps") | .Value) // "-"
+            $vpc,
+            $subnet,
+            (.SubnetId // "-"),
+            (.VpcId // "-"),
+            (.CidrBlock // "-"),
+            (.AvailabilityZone // "-"),
+            (.AvailableIpAddressCount // "-"),
+            (.MapPublicIpOnLaunch | tostring // "-"),
+            (.DefaultForAz | tostring // "-"),
+            (.State // "-"),
+            (
+              ( .Tags // [] )
+              | map( "\(.Key)=\(.Value)" )
+              | join( "\n" )
+            ) // "-"
           ] | @csv
         ' "${target_file}" | tee -a "${output_file}";
       done;
@@ -627,13 +678,27 @@ function report_subnets_metadata () {
 }; alias report-subnets-metadata='report_subnets_metadata';
 
 #------------------------------------------------------------------------------#
-# Report Aggregator: DHCP Options across all VPCs
-# Scans all folders in ${latest_folder}, excluding "shared" and "exports"
-# Processes each vpc-*/dhcp-options.json file
-# Aggregates into a single CSV:
-# - VPC, DhcpOptionsId, OwnerId, Key, Values, Tags
+# Report Aggregator: DHCP Options across all VPCs - CSV Output
+# Scans all folders in ${latest_folder}, excluding "shared" and "exports".
+# Processes each vpcs/*/dhcp_options.json file.
 #
-# Output: dhcp_options_all_vpcs.csv in exports folder
+# Extracts for each DhcpOptions entry:
+# - DhcpOptionsId
+# - OwnerId
+# - Configuration Key
+# - Configuration Values (comma-separated)
+# - Tags (newline-separated Key=Value pairs)
+#
+# CSV Columns:
+# - VPC
+# - DhcpOptionsId
+# - OwnerId
+# - Key
+# - Values
+# - Tags
+#
+# Output file:
+# - ${exports_folder}/vpcs_dhcp_options.csv
 #------------------------------------------------------------------------------#
 
 function report_vpcs_dhcp_options () {
@@ -666,38 +731,47 @@ function report_vpcs_dhcp_options () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .DhcpOptions[]? as $opt |
-          ($opt.DhcpConfigurations[]? // {}) as $config |
-          [
-              $vpc,
-              ($opt.DhcpOptionsId // "-"),
-              ($opt.OwnerId // "-"),
-              ($config.Key // "-"),
-              (
-                  ($config.Values // [])
-                  | map(.Value // "-")
-                  | join(",")
-              ),
-              (
-                  ($opt.Tags // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .DhcpOptions[]? as $opt |
+        ($opt.DhcpConfigurations[]? // {}) as $config |
+        [
+          $vpc,
+          ($opt.DhcpOptionsId // "-"),
+          ($opt.OwnerId // "-"),
+          ($config.Key // "-"),
+          (
+            ($config.Values // [])
+            | map(.Value // "-")
+            | join(",")
+          ),
+          (
+            ( $opt.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          ) // "-"
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
     return 0;
-}; alias report-vpcs_dhcp-options='report_vpcs_dhcp_options';
+}; alias report-vpcs-dhcp-options='report_vpcs_dhcp_options';
 
 #------------------------------------------------------------------------------#
 # Report Aggregator: Internet Gateways across all VPCs
 # Scans all folders in ${latest_folder}, excluding "shared" and "exports"
 # Processes each vpc-*/igw.json file
-# Aggregates into a single CSV:
-# - VPC, InternetGatewayId, OwnerId, AttachmentVpcId, AttachmentState, Tags
+# Each file contains a list of Internet Gateways and their attachments.
+# Extracts:
+# - InternetGatewayId, OwnerId, AttachmentVpcId, AttachmentState, Tags
 #
-# Output: igw_all_vpcs.csv in exports folder
+# CSV Columns:
+# - VPC
+# - InternetGatewayId
+# - OwnerId
+# - AttachmentVpcId
+# - AttachmentState
+# - Tags (newline-separated Key=Value pairs)
+#
+# Output: vpcs_igws.csv in exports folder
 #------------------------------------------------------------------------------#
 
 function report_vpcs_igws () {
@@ -730,20 +804,20 @@ function report_vpcs_igws () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .InternetGateways[]? as $igw |
-          ($igw.Attachments[]? // {}) as $attach |
-          [
-              $vpc,
-              ($igw.InternetGatewayId // "-"),
-              ($igw.OwnerId // "-"),
-              ($attach.VpcId // "-"),
-              ($attach.State // "-"),
-              (
-                  ($igw.Tags // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .InternetGateways[]? as $igw |
+        ($igw.Attachments[]? // {}) as $attach |
+        [
+          $vpc,
+          ($igw.InternetGatewayId // "-"),
+          ($igw.OwnerId // "-"),
+          ($attach.VpcId // "-"),
+          ($attach.State // "-"),
+          (
+            ( $igw.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          )
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -757,7 +831,22 @@ function report_vpcs_igws () {
 # Aggregates into a single CSV:
 # - VPC, NetworkAclId, VpcId, OwnerId, IsDefault,
 #   AssociationId, AssociatedSubnetId,
-#   RuleNumber, Protocol, RuleAction, Egress, CidrBlock
+#   RuleNumber, Protocol, RuleAction, Egress, CidrBlock, Tags
+#
+# CSV Columns:
+# - VPC
+# - NetworkAclId
+# - VpcId
+# - OwnerId
+# - IsDefault
+# - AssociationId
+# - AssociatedSubnetId
+# - RuleNumber
+# - Protocol
+# - RuleAction
+# - Egress
+# - CidrBlock
+# - Tags (newline-separated Key=Value pairs)
 #
 # Output: vpcs_network_acls.csv in exports folder
 #------------------------------------------------------------------------------#
@@ -781,6 +870,7 @@ function report_vpcs_network_acls () {
       RuleAction
       Egress
       CidrBlock
+      Tags
     ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
@@ -798,23 +888,28 @@ function report_vpcs_network_acls () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .NetworkAcls[]? as $acl |
-          ($acl.Associations[]? // [{}]) as $assoc |
-          ($acl.Entries[]? // [{}]) as $entry |
-          [
-              $vpc,
-              ($acl.NetworkAclId // "-"),
-              ($acl.VpcId // "-"),
-              ($acl.OwnerId // "-"),
-              ($acl.IsDefault | tostring // "-"),
-              ($assoc.NetworkAclAssociationId // "-"),
-              ($assoc.SubnetId // "-"),
-              ($entry.RuleNumber | tostring // "-"),
-              ($entry.Protocol // "-"),
-              ($entry.RuleAction // "-"),
-              ($entry.Egress | tostring // "-"),
-              ($entry.CidrBlock // "-")
-          ] | @csv
+        .NetworkAcls[]? as $acl |
+        ($acl.Associations[]? // [{}]) as $assoc |
+        ($acl.Entries[]? // [{}]) as $entry |
+        [
+          $vpc,
+          ($acl.NetworkAclId // "-"),
+          ($acl.VpcId // "-"),
+          ($acl.OwnerId // "-"),
+          ($acl.IsDefault | tostring // "-"),
+          ($assoc.NetworkAclAssociationId // "-"),
+          ($assoc.SubnetId // "-"),
+          ($entry.RuleNumber | tostring // "-"),
+          ($entry.Protocol // "-"),
+          ($entry.RuleAction // "-"),
+          ($entry.Egress | tostring // "-"),
+          ($entry.CidrBlock // "-"),
+          (
+            ( $acl.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          ) // "-"
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -825,11 +920,31 @@ function report_vpcs_network_acls () {
 # Report Aggregator: Network Interfaces across all VPCs
 # Scans all folders in ${latest_folder}, excluding "shared" and "exports"
 # Processes each vpc-*/network_interfaces.json file
-# Aggregates into a single CSV:
-# - VPC, NetworkInterfaceId, SubnetId, VpcId, InterfaceType, Status,
+#
+# Extracts:
+# - NetworkInterfaceId, SubnetId, VpcId, InterfaceType, Status,
 #   PrivateIpAddress, PublicIp, MacAddress, Description, OwnerId,
-#   AttachmentId, InstanceId, DeviceIndex,
-#   SecurityGroups (group-id=group-name;...), Tags (key=value;...)
+#   AttachmentId, InstanceId, DeviceIndex
+# - SecurityGroups: semicolon-separated list of GroupId=GroupName pairs
+# - Tags: newline-separated Key=Value pairs
+#
+# CSV Columns:
+# - VPC
+# - NetworkInterfaceId
+# - SubnetId
+# - VpcId
+# - InterfaceType
+# - Status
+# - PrivateIpAddress
+# - PublicIp
+# - MacAddress
+# - Description
+# - OwnerId
+# - AttachmentId
+# - InstanceId
+# - DeviceIndex
+# - SecurityGroups
+# - Tags (newline-separated Key=Value pairs)
 #
 # Output: vpcs_network_interfaces.csv in exports folder
 #------------------------------------------------------------------------------#
@@ -874,33 +989,33 @@ function report_vpcs_network_interfaces () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .NetworkInterfaces[]? as $eni |
-          [
-              $vpc,
-              ($eni.NetworkInterfaceId // "-"),
-              ($eni.SubnetId // "-"),
-              ($eni.VpcId // "-"),
-              ($eni.InterfaceType // "-"),
-              ($eni.Status // "-"),
-              ($eni.PrivateIpAddress // "-"),
-              ($eni.Association.PublicIp // "-"),
-              ($eni.MacAddress // "-"),
-              ($eni.Description // "-"),
-              ($eni.OwnerId // "-"),
-              ($eni.Attachment.AttachmentId // "-"),
-              ($eni.Attachment.InstanceId // "-"),
-              ($eni.Attachment.DeviceIndex | tostring // "-"),
-              (
-                  ($eni.Groups // [])
-                  | map("\(.GroupId)=\(.GroupName)")
-                  | join(";")
-              ),
-              (
-                  ($eni.TagSet // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .NetworkInterfaces[]? as $eni |
+        [
+          $vpc,
+          ($eni.NetworkInterfaceId // "-"),
+          ($eni.SubnetId // "-"),
+          ($eni.VpcId // "-"),
+          ($eni.InterfaceType // "-"),
+          ($eni.Status // "-"),
+          ($eni.PrivateIpAddress // "-"),
+          ($eni.Association.PublicIp // "-"),
+          ($eni.MacAddress // "-"),
+          ($eni.Description // "-"),
+          ($eni.OwnerId // "-"),
+          ($eni.Attachment.AttachmentId // "-"),
+          ($eni.Attachment.InstanceId // "-"),
+          ($eni.Attachment.DeviceIndex | tostring // "-"),
+          (
+            ($eni.Groups // [])
+            | map("\(.GroupId)=\(.GroupName)")
+            | join(";")
+          ),
+          (
+            ( $eni.TagSet // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          ) // "-"
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -913,7 +1028,19 @@ function report_vpcs_network_interfaces () {
 # Processes each vpc-*/security_groups_unattached.json file
 # Aggregates into a single CSV:
 # - VPC, GroupId, GroupName, Description, VpcId, OwnerId, SecurityGroupArn,
-#   IngressProtocols, EgressProtocols
+#   IngressProtocols, EgressProtocols, Tags
+#
+# CSV Columns:
+# - VPC
+# - GroupId
+# - GroupName
+# - Description
+# - VpcId
+# - OwnerId
+# - SecurityGroupArn
+# - IngressProtocols
+# - EgressProtocols
+# - Tags (newline-separated Key=Value pairs)
 #
 # Output: vpcs_security_groups_unattached.csv in exports folder
 #------------------------------------------------------------------------------#
@@ -934,6 +1061,7 @@ function report_vpcs_security_groups_unattached () {
       SecurityGroupArn
       IngressProtocols
       EgressProtocols
+      Tags
     ); IFS=','; echo "${headers[*]}" > "${output_file}";
 
     for vpc_path in "${latest_folder}/vpcs"/*/; do
@@ -951,22 +1079,33 @@ function report_vpcs_security_groups_unattached () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .[]? as $sg |
-          [
-              $vpc,
-              ($sg.GroupId // "-"),
-              ($sg.GroupName // "-"),
-              ($sg.Description // "-"),
-              ($sg.VpcId // "-"),
-              ($sg.OwnerId // "-"),
-              ($sg.SecurityGroupArn // "-"),
-              (
-                  ($sg.IpPermissions // []) | map(.IpProtocol // "-") | unique | join(",")
-              ),
-              (
-                  ($sg.IpPermissionsEgress // []) | map(.IpProtocol // "-") | unique | join(",")
-              )
-          ] | @csv
+        .[]? as $sg |
+        [
+          $vpc,
+          ($sg.GroupId // "-"),
+          ($sg.GroupName // "-"),
+          ($sg.Description // "-"),
+          ($sg.VpcId // "-"),
+          ($sg.OwnerId // "-"),
+          ($sg.SecurityGroupArn // "-"),
+          (
+            ($sg.IpPermissions // [])
+            | map(.IpProtocol // "-")
+            | unique
+            | join(",")
+          ),
+          (
+            ($sg.IpPermissionsEgress // [])
+            | map(.IpProtocol // "-")
+            | unique
+            | join(",")
+          ),
+          (
+            ( $sg.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          ) // "-"
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -975,12 +1114,27 @@ function report_vpcs_security_groups_unattached () {
 
 #------------------------------------------------------------------------------#
 # Report Aggregator: Security Groups across all VPCs
-# Processes each vpc-*/security_groups.json file
-# Aggregates into a single CSV:
-# - VPC, GroupId, GroupName, Description, VpcId, OwnerId, SecurityGroupArn,
-#   IngressRules, EgressRules, Tags
+#------------------------------------------------------------------------------
+# Processes each VPC-specific security_groups.json file in:
+#   <latest_folder>/vpcs/<vpc_name>/security_groups.json
 #
-# Output: vpcs_security_groups.csv in exports folder
+# Extracts for each Security Group:
+# - VPC:            Folder name representing the VPC
+# - GroupId:        Security Group ID
+# - GroupName:      Name of the Security Group
+# - Description:    Description of the Security Group
+# - VpcId:          VPC ID the Security Group belongs to
+# - OwnerId:        AWS Account Owner ID
+# - SecurityGroupArn: Full ARN of the Security Group
+# - IngressRules:   Flattened list of ingress rules in format:
+#                   IpProtocol:FromPort-ToPort:CidrIp[,CidrIp,...]
+#                   (multiple rules separated by semicolons)
+# - EgressRules:    Same format as IngressRules, for egress traffic
+# - Tags:           List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: vpcs_security_groups.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_vpcs_security_groups () {
@@ -988,7 +1142,6 @@ function report_vpcs_security_groups () {
     local output_file="${exports_folder}/vpcs_security_groups.csv";
     : > "${output_file}";
 
-    ## Define the CSV headers as an array
     local headers=(
       VPC
       GroupId
@@ -1029,44 +1182,40 @@ function report_vpcs_security_groups () {
           # Ingress rules
           (
             ($sg.IpPermissions // []) | map(
-              (
-                (.IpProtocol // "-")
-                + ":" + ((.FromPort // "-") | tostring)
-                + "-" + ((.ToPort // "-") | tostring)
-                + ":" + (
-                  (
-                    ((.IpRanges // []) | map(select(type == "object") | .CidrIp // "-"))
-                    + ((.Ipv6Ranges // []) | map(select(type == "object") | .CidrIpv6 // "-"))
-                    + ((.UserIdGroupPairs // []) | map(select(type == "object") | .GroupId // "-"))
-                    + ((.PrefixListIds // []) | map(select(type == "object") | .PrefixListId // "-"))
-                  )
-                  | join(",")
-                )
+              (.IpProtocol // "-")
+              + ":" + ((.FromPort // "-") | tostring)
+              + "-" + ((.ToPort // "-") | tostring)
+              + ":" + (
+                (
+                  ((.IpRanges // []) | map(select(type == "object") | .CidrIp // "-"))
+                  + ((.Ipv6Ranges // []) | map(select(type == "object") | .CidrIpv6 // "-"))
+                  + ((.UserIdGroupPairs // []) | map(select(type == "object") | .GroupId // "-"))
+                  + ((.PrefixListIds // []) | map(select(type == "object") | .PrefixListId // "-"))
+                ) | join(",")
               )
             ) | join(";")
           ),
           # Egress rules
           (
             ($sg.IpPermissionsEgress // []) | map(
-              (
-                (.IpProtocol // "-")
-                + ":" + ((.FromPort // "-") | tostring)
-                + "-" + ((.ToPort // "-") | tostring)
-                + ":" + (
-                  (
-                    ((.IpRanges // []) | map(select(type == "object") | .CidrIp // "-"))
-                    + ((.Ipv6Ranges // []) | map(select(type == "object") | .CidrIpv6 // "-"))
-                    + ((.UserIdGroupPairs // []) | map(select(type == "object") | .GroupId // "-"))
-                    + ((.PrefixListIds // []) | map(select(type == "object") | .PrefixListId // "-"))
-                  )
-                  | join(",")
-                )
+              (.IpProtocol // "-")
+              + ":" + ((.FromPort // "-") | tostring)
+              + "-" + ((.ToPort // "-") | tostring)
+              + ":" + (
+                (
+                  ((.IpRanges // []) | map(select(type == "object") | .CidrIp // "-"))
+                  + ((.Ipv6Ranges // []) | map(select(type == "object") | .CidrIpv6 // "-"))
+                  + ((.UserIdGroupPairs // []) | map(select(type == "object") | .GroupId // "-"))
+                  + ((.PrefixListIds // []) | map(select(type == "object") | .PrefixListId // "-"))
+                ) | join(",")
               )
             ) | join(";")
           ),
           # Tags
           (
-            ($sg.Tags // []) | map("\(.Key)=\(.Value)") | join(";")
+            ( $sg.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
           )
         ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
@@ -1077,11 +1226,24 @@ function report_vpcs_security_groups () {
 
 #------------------------------------------------------------------------------#
 # Report Aggregator: EC2 Instances across all VPCs
-# Processes each vpc-*/vpc_ec2_instances.json file
-# Aggregates into a single CSV:
-# - VPC, InstanceId, State, SubnetId, VpcId, PrivateIpAddress, PublicIpAddress, IamRole, Tags
+#------------------------------------------------------------------------------
+# Processes each VPC-specific vpc_ec2_instances.json file in:
+#   <latest_folder>/vpcs/<vpc_name>/vpc_ec2_instances.json
 #
-# Output: vpcs_ec2_instances.csv in exports folder
+# Extracts for each EC2 instance:
+# - VPC:               Folder name representing the VPC
+# - InstanceId:        EC2 Instance ID
+# - State:             EC2 instance state (running, stopped, etc.)
+# - SubnetId:          Subnet ID where the instance resides
+# - VpcId:             VPC ID where the instance resides
+# - PrivateIpAddress:  Private IPv4 address
+# - PublicIpAddress:   Public IPv4 address (if any)
+# - IamRole:           IAM Role name (or "-")
+# - Tags:              List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: vpcs_ec2_instances.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_vpcs_ec2_instances () {
@@ -1089,7 +1251,6 @@ function report_vpcs_ec2_instances () {
     local output_file="${exports_folder}/vpcs_ec2_instances.csv";
     : > "${output_file}";
 
-    ## Define the CSV headers as an array
     local headers=(
       VPC
       InstanceId
@@ -1117,22 +1278,22 @@ function report_vpcs_ec2_instances () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .[]? as $ec2 |
-          [
-              $vpc,
-              ($ec2.InstanceId // "-"),
-              ($ec2.State // "-"),
-              ($ec2.SubnetId // "-"),
-              ($ec2.VpcId // "-"),
-              ($ec2.PrivateIpAddress // "-"),
-              ($ec2.PublicIpAddress // "-"),
-              ($ec2.IamRole // "-"),
-              (
-                  ($ec2.Tags // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .[]? as $ec2 |
+        [
+          $vpc,
+          ($ec2.InstanceId // "-"),
+          ($ec2.State // "-"),
+          ($ec2.SubnetId // "-"),
+          ($ec2.VpcId // "-"),
+          ($ec2.PrivateIpAddress // "-"),
+          ($ec2.PublicIpAddress // "-"),
+          ($ec2.IamRole // "-"),
+          (
+            ( $ec2.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          )
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -1141,13 +1302,30 @@ function report_vpcs_ec2_instances () {
 
 #------------------------------------------------------------------------------#
 # Report Aggregator: NAT Gateways across all VPCs
-# Processes each vpc-*/vpc_nat_gateways.json file
-# Aggregates into a single CSV:
-# - VPC, NatGatewayId, State, VpcId, SubnetId, ConnectivityType, CreateTime,
-#   AllocationId, NetworkInterfaceId, PrivateIp, PublicIp, AssociationId, IsPrimary, AddressStatus,
-#   Tags
+#------------------------------------------------------------------------------
+# Processes each VPC-specific vpc_nat_gateways.json file in:
+#   <latest_folder>/vpcs/<vpc_name>/vpc_nat_gateways.json
 #
-# Output: vpcs_nat_gateways.csv in exports folder
+# Extracts for each NAT Gateway:
+# - VPC:                Folder name representing the VPC
+# - NatGatewayId:       NAT Gateway ID
+# - State:              NAT Gateway state
+# - VpcId:              VPC ID where the NAT Gateway resides
+# - SubnetId:           Subnet ID where the NAT Gateway resides
+# - ConnectivityType:   Connectivity type (public or private)
+# - CreateTime:         Creation timestamp
+# - AllocationId:       Elastic IP Allocation ID (from NatGatewayAddresses block)
+# - NetworkInterfaceId: Network Interface ID of the NAT Gateway
+# - PrivateIp:          Private IP address of the NAT Gateway
+# - PublicIp:           Public IP address of the NAT Gateway
+# - AssociationId:      Elastic IP Association ID
+# - IsPrimary:          Boolean flag indicating if the address is primary
+# - AddressStatus:      Status of the NAT Gateway address
+# - Tags:               List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: vpcs_nat_gateways.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_vpcs_nat_gateways () {
@@ -1155,7 +1333,6 @@ function report_vpcs_nat_gateways () {
     local output_file="${exports_folder}/vpcs_nat_gateways.csv";
     : > "${output_file}";
 
-    ## Define the CSV headers as an array
     local headers=(
       VPC
       NatGatewayId
@@ -1189,29 +1366,29 @@ function report_vpcs_nat_gateways () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .NatGateways[]? as $nat |
-          ($nat.NatGatewayAddresses[]? // [{}]) as $addr |
-          [
-              $vpc,
-              ($nat.NatGatewayId // "-"),
-              ($nat.State // "-"),
-              ($nat.VpcId // "-"),
-              ($nat.SubnetId // "-"),
-              ($nat.ConnectivityType // "-"),
-              ($nat.CreateTime // "-"),
-              ($addr.AllocationId // "-"),
-              ($addr.NetworkInterfaceId // "-"),
-              ($addr.PrivateIp // "-"),
-              ($addr.PublicIp // "-"),
-              ($addr.AssociationId // "-"),
-              ($addr.IsPrimary | tostring // "-"),
-              ($addr.Status // "-"),
-              (
-                  ($nat.Tags // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .NatGateways[]? as $nat |
+        ($nat.NatGatewayAddresses[]? // [{}]) as $addr |
+        [
+          $vpc,
+          ($nat.NatGatewayId // "-"),
+          ($nat.State // "-"),
+          ($nat.VpcId // "-"),
+          ($nat.SubnetId // "-"),
+          ($nat.ConnectivityType // "-"),
+          ($nat.CreateTime // "-"),
+          ($addr.AllocationId // "-"),
+          ($addr.NetworkInterfaceId // "-"),
+          ($addr.PrivateIp // "-"),
+          ($addr.PublicIp // "-"),
+          ($addr.AssociationId // "-"),
+          ($addr.IsPrimary | tostring // "-"),
+          ($addr.Status // "-"),
+          (
+            ( $nat.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          )
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -1220,14 +1397,27 @@ function report_vpcs_nat_gateways () {
 
 #------------------------------------------------------------------------------#
 # Report Aggregator: Unassociated VPC Route Tables across all VPCs
-# Processes each vpc-*/vpc_route_tables_unassociated.json file
-# Aggregates into a single CSV:
-# - VPC, RouteTableId, VpcId, OwnerId,
-#   AssociationId, AssociationState, Main,
-#   DestinationCidrBlock, GatewayId, Origin, RouteState,
-#   Tags
+#------------------------------------------------------------------------------
+# Processes each VPC-specific vpc_route_tables_unassociated.json file in:
+#   <latest_folder>/vpcs/<vpc_name>/vpc_route_tables_unassociated.json
 #
-# Output: vpcs_route_tables_unassociated.csv in exports folder
+# Extracts for each Route Table:
+# - VPC:                   Folder name representing the VPC
+# - RouteTableId:          Route Table ID
+# - VpcId:                 VPC ID where the Route Table resides
+# - OwnerId:               AWS Account Owner ID
+# - AssociationId:         Route Table Association ID
+# - AssociationState:      Association state (associated, disassociated)
+# - Main:                  Whether this is the main Route Table
+# - DestinationCidrBlock:  Route destination CIDR block
+# - GatewayId:             Gateway or target of the route
+# - Origin:                Route origin (CreateRouteTable, CreateRoute)
+# - RouteState:            Route state (active, blackhole)
+# - Tags:                  List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: vpcs_route_tables_unassociated.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_vpcs_route_tables_unassociated () {
@@ -1235,7 +1425,6 @@ function report_vpcs_route_tables_unassociated () {
     local output_file="${exports_folder}/vpcs_route_tables_unassociated.csv";
     : > "${output_file}";
 
-    ## Define the CSV headers as an array
     local headers=(
       VPC
       RouteTableId
@@ -1266,27 +1455,27 @@ function report_vpcs_route_tables_unassociated () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .[]? as $rtb |
-          ($rtb.Associations[]? // [{}]) as $assoc |
-          ($rtb.Routes[]? // [{}]) as $route |
-          [
-              $vpc,
-              ($rtb.RouteTableId // "-"),
-              ($rtb.VpcId // "-"),
-              ($rtb.OwnerId // "-"),
-              ($assoc.RouteTableAssociationId // "-"),
-              ($assoc.AssociationState.State // "-"),
-              ($assoc.Main | tostring // "-"),
-              ($route.DestinationCidrBlock // "-"),
-              ($route.GatewayId // "-"),
-              ($route.Origin // "-"),
-              ($route.State // "-"),
-              (
-                  ($rtb.Tags // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .[]? as $rtb |
+        ($rtb.Associations[]? // [{}]) as $assoc |
+        ($rtb.Routes[]? // [{}]) as $route |
+        [
+          $vpc,
+          ($rtb.RouteTableId // "-"),
+          ($rtb.VpcId // "-"),
+          ($rtb.OwnerId // "-"),
+          ($assoc.RouteTableAssociationId // "-"),
+          ($assoc.AssociationState.State // "-"),
+          ($assoc.Main | tostring // "-"),
+          ($route.DestinationCidrBlock // "-"),
+          ($route.GatewayId // "-"),
+          ($route.Origin // "-"),
+          ($route.State // "-"),
+          (
+            ( $rtb.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          )
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -1295,14 +1484,30 @@ function report_vpcs_route_tables_unassociated () {
 
 #------------------------------------------------------------------------------#
 # Report Aggregator: VPC Route Tables across all VPCs
-# Processes each vpc-*/vpc_route_tables.json file
-# Aggregates into a single CSV:
-# - VPC, RouteTableId, VpcId, OwnerId,
-#   AssociationId, AssociationState, Main, SubnetId,
-#   Destination (CIDR or PrefixList), GatewayId, TransitGatewayId, VpcPeeringConnectionId, Origin, State,
-#   Tags
+#------------------------------------------------------------------------------
+# Processes each VPC-specific vpc_route_tables.json file in:
+#   <latest_folder>/vpcs/<vpc_name>/vpc_route_tables.json
 #
-# Output: vpcs_route_tables.csv in exports folder
+# Extracts for each Route Table:
+# - VPC:                      Folder name representing the VPC
+# - RouteTableId:              Route Table ID
+# - VpcId:                     VPC ID
+# - OwnerId:                   AWS Account Owner ID
+# - AssociationId:             Route Table Association ID
+# - AssociationState:          Association state (associated, disassociated)
+# - Main:                      Whether this is the main Route Table
+# - SubnetId:                  Associated Subnet ID
+# - Destination:               Destination CIDR or Prefix List ID
+# - GatewayId:                 Gateway target (IGW, NAT, etc.)
+# - TransitGatewayId:          Transit Gateway target (if any)
+# - VpcPeeringConnectionId:    VPC Peering target (if any)
+# - Origin:                    Route origin (CreateRouteTable, CreateRoute)
+# - State:                     Route state (active, blackhole)
+# - Tags:                      List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: vpcs_route_tables.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_vpcs_route_tables () {
@@ -1310,7 +1515,6 @@ function report_vpcs_route_tables () {
     local output_file="${exports_folder}/vpcs_route_tables.csv";
     : > "${output_file}";
 
-    ## Define the CSV headers as an array
     local headers=(
       VPC
       RouteTableId
@@ -1344,33 +1548,33 @@ function report_vpcs_route_tables () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .RouteTables[]? as $rtb |
-          ($rtb.Associations[]? // [{}]) as $assoc |
-          ($rtb.Routes[]? // [{}]) as $route |
-          [
-              $vpc,
-              ($rtb.RouteTableId // "-"),
-              ($rtb.VpcId // "-"),
-              ($rtb.OwnerId // "-"),
-              ($assoc.RouteTableAssociationId // "-"),
-              ($assoc.AssociationState.State // "-"),
-              ($assoc.Main | tostring // "-"),
-              ($assoc.SubnetId // "-"),
-              (
-                  $route.DestinationCidrBlock //
-                  $route.DestinationPrefixListId // "-"
-              ),
-              ($route.GatewayId // "-"),
-              ($route.TransitGatewayId // "-"),
-              ($route.VpcPeeringConnectionId // "-"),
-              ($route.Origin // "-"),
-              ($route.State // "-"),
-              (
-                  ($rtb.Tags // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .RouteTables[]? as $rtb |
+        ($rtb.Associations[]? // [{}]) as $assoc |
+        ($rtb.Routes[]? // [{}]) as $route |
+        [
+          $vpc,
+          ($rtb.RouteTableId // "-"),
+          ($rtb.VpcId // "-"),
+          ($rtb.OwnerId // "-"),
+          ($assoc.RouteTableAssociationId // "-"),
+          ($assoc.AssociationState.State // "-"),
+          ($assoc.Main | tostring // "-"),
+          ($assoc.SubnetId // "-"),
+          (
+            $route.DestinationCidrBlock //
+            $route.DestinationPrefixListId // "-"
+          ),
+          ($route.GatewayId // "-"),
+          ($route.TransitGatewayId // "-"),
+          ($route.VpcPeeringConnectionId // "-"),
+          ($route.Origin // "-"),
+          ($route.State // "-"),
+          (
+            ( $rtb.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join("\n")
+          )
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -1379,14 +1583,27 @@ function report_vpcs_route_tables () {
 
 #------------------------------------------------------------------------------#
 # Report Aggregator: Transit Gateway Attachments across all VPCs
-# Processes each vpc-*/transit_gateways_attachments.json file
-# Aggregates into a single CSV:
-# - VPC, TransitGatewayAttachmentId, TransitGatewayId, TransitGatewayOwnerId,
-#   ResourceOwnerId, ResourceType, ResourceId, State,
-#   AssociatedRouteTableId, AssociationState,
-#   CreationTime, Tags
+#------------------------------------------------------------------------------
+# Processes each VPC-specific vpc_tgw_attachments.json file in:
+#   <latest_folder>/vpcs/<vpc_name>/vpc_tgw_attachments.json
 #
-# Output: vpcs_transit_gateway_attachments.csv in exports folder
+# Extracts for each TGW Attachment:
+# - VPC:                        Folder name representing the VPC
+# - TransitGatewayAttachmentId:  TGW Attachment ID
+# - TransitGatewayId:            Transit Gateway ID
+# - TransitGatewayOwnerId:       AWS Account ID of the TGW owner
+# - ResourceOwnerId:             AWS Account ID of the attachment resource owner
+# - ResourceType:                Type of the attached resource (e.g., vpc, vpn)
+# - ResourceId:                  ID of the attached resource (e.g., vpc-xxxx)
+# - State:                       Attachment state (available, pending, etc.)
+# - AssociatedRouteTableId:      Transit Gateway Route Table ID (association)
+# - AssociationState:            State of the route table association
+# - CreationTime:                Timestamp of attachment creation
+# - Tags:                        List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: vpcs_tgw_attachments.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_vpcs_transit_gateway_attachments () {
@@ -1394,7 +1611,6 @@ function report_vpcs_transit_gateway_attachments () {
     local output_file="${exports_folder}/vpcs_tgw_attachments.csv";
     : > "${output_file}";
 
-    ## Define the CSV headers as an array
     local headers=(
       VPC
       TransitGatewayAttachmentId
@@ -1425,25 +1641,25 @@ function report_vpcs_transit_gateway_attachments () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .TransitGatewayAttachments[]? as $attach |
-          [
-              $vpc,
-              ($attach.TransitGatewayAttachmentId // "-"),
-              ($attach.TransitGatewayId // "-"),
-              ($attach.TransitGatewayOwnerId // "-"),
-              ($attach.ResourceOwnerId // "-"),
-              ($attach.ResourceType // "-"),
-              ($attach.ResourceId // "-"),
-              ($attach.State // "-"),
-              ($attach.Association.TransitGatewayRouteTableId // "-"),
-              ($attach.Association.State // "-"),
-              ($attach.CreationTime // "-"),
-              (
-                  ($attach.Tags // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .TransitGatewayAttachments[]? as $attach |
+        [
+          $vpc,
+          ($attach.TransitGatewayAttachmentId // "-"),
+          ($attach.TransitGatewayId // "-"),
+          ($attach.TransitGatewayOwnerId // "-"),
+          ($attach.ResourceOwnerId // "-"),
+          ($attach.ResourceType // "-"),
+          ($attach.ResourceId // "-"),
+          ($attach.State // "-"),
+          ($attach.Association.TransitGatewayRouteTableId // "-"),
+          ($attach.Association.State // "-"),
+          ($attach.CreationTime // "-"),
+          (
+            ( $attach.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join("\n")
+          )
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -1452,12 +1668,27 @@ function report_vpcs_transit_gateway_attachments () {
 
 #------------------------------------------------------------------------------#
 # Report Aggregator: VPC Metadata across all VPCs
-# Processes each vpc-*/vpc.json file
-# Aggregates into a single CSV:
-# - VPC, VpcId, State, OwnerId, InstanceTenancy, CidrBlock, DhcpOptionsId, IsDefault, InternetGatewayBlockMode,
-#   CidrBlockAssociations, Tags
+#------------------------------------------------------------------------------
+# Processes each VPC-specific vpc.json file in:
+#   <latest_folder>/vpcs/<vpc_name>/vpc.json
 #
-# Output: vpcs_metadata.csv in exports folder
+# Extracts for each VPC:
+# - VPC:                     Folder name representing the VPC
+# - VpcId:                   VPC ID
+# - State:                   VPC state (available, pending)
+# - OwnerId:                 AWS Account Owner ID
+# - InstanceTenancy:         VPC tenancy (default/dedicated/host)
+# - CidrBlock:               Primary CIDR block
+# - DhcpOptionsId:           Associated DHCP Options Set ID
+# - IsDefault:               Whether this is the default VPC
+# - InternetGatewayBlockMode: IGW Block Mode (enabled/disabled)
+# - CidrBlockAssociations:   List of CIDR block associations in the format:
+#                            AssociationId=CidrBlock(State);AssociationId=...
+# - Tags:                    List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: vpcs_metadata.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_vpcs_metadata () {
@@ -1465,7 +1696,6 @@ function report_vpcs_metadata () {
     local output_file="${exports_folder}/vpcs_metadata.csv";
     : > "${output_file}";
 
-    ## Define the CSV headers as an array
     local headers=(
       VPC
       VpcId
@@ -1495,30 +1725,30 @@ function report_vpcs_metadata () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .Vpcs[]? as $vpc_obj |
-          [
-              $vpc,
-              ($vpc_obj.VpcId // "-"),
-              ($vpc_obj.State // "-"),
-              ($vpc_obj.OwnerId // "-"),
-              ($vpc_obj.InstanceTenancy // "-"),
-              ($vpc_obj.CidrBlock // "-"),
-              ($vpc_obj.DhcpOptionsId // "-"),
-              ($vpc_obj.IsDefault | tostring // "-"),
-              ($vpc_obj.BlockPublicAccessStates.InternetGatewayBlockMode // "-"),
-              (
-                  ($vpc_obj.CidrBlockAssociationSet // [])
-                  | map(
-                      (.AssociationId // "-") + "=" + (.CidrBlock // "-") + "(" + (.CidrBlockState.State // "-") + ")"
-                  )
-                  | join(";")
-              ),
-              (
-                  ($vpc_obj.Tags // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .Vpcs[]? as $vpc_obj |
+        [
+          $vpc,
+          ($vpc_obj.VpcId // "-"),
+          ($vpc_obj.State // "-"),
+          ($vpc_obj.OwnerId // "-"),
+          ($vpc_obj.InstanceTenancy // "-"),
+          ($vpc_obj.CidrBlock // "-"),
+          ($vpc_obj.DhcpOptionsId // "-"),
+          ($vpc_obj.IsDefault | tostring // "-"),
+          ($vpc_obj.BlockPublicAccessStates.InternetGatewayBlockMode // "-"),
+          (
+            ($vpc_obj.CidrBlockAssociationSet // [])
+            | map(
+              (.AssociationId // "-") + "=" + (.CidrBlock // "-") + "(" + (.CidrBlockState.State // "-") + ")"
+            )
+            | join(";")
+          ),
+          (
+            ( $vpc_obj.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          )
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
@@ -1527,13 +1757,32 @@ function report_vpcs_metadata () {
 
 #------------------------------------------------------------------------------#
 # Report Aggregator: VPC Endpoints across all VPCs
-# Processes each vpc-*/vpc_endpoints.json file
-# Aggregates into a single CSV:
-# - VPC, VpcEndpointId, VpcEndpointType, VpcId, ServiceName, ServiceRegion,
-#   State, PrivateDnsEnabled, RequesterManaged, IpAddressType, CreationTimestamp,
-#   RouteTableIds, SubnetIds, NetworkInterfaceIds, Groups, DnsEntries, Tags
+#------------------------------------------------------------------------------
+# Processes each VPC-specific vpc_endpoints.json file in:
+#   <latest_folder>/vpcs/<vpc_name>/vpc_endpoints.json
 #
-# Output: vpcs_endpoints.csv in exports folder
+# Extracts for each VPC Endpoint:
+# - VPC:                  Folder name representing the VPC
+# - VpcEndpointId:        VPC Endpoint ID
+# - VpcEndpointType:      Endpoint type (Interface, Gateway, etc.)
+# - VpcId:                VPC ID
+# - ServiceName:          AWS service name
+# - ServiceRegion:        Region of the service
+# - State:                Endpoint state (available, pending, etc.)
+# - PrivateDnsEnabled:    Whether Private DNS is enabled
+# - RequesterManaged:     Whether requester manages this endpoint
+# - IpAddressType:        Address type (IPv4, DualStack, etc.)
+# - CreationTimestamp:    Creation time
+# - RouteTableIds:        Associated Route Table IDs (comma-separated)
+# - SubnetIds:            Associated Subnet IDs (comma-separated)
+# - NetworkInterfaceIds:  ENI IDs (comma-separated)
+# - Groups:               List of groups as GroupId=GroupName pairs (semicolon-separated)
+# - DnsEntries:           List of DNS entries as DnsName=HostedZoneId pairs (semicolon-separated)
+# - Tags:                 List of tags in "Key=Value" format, separated by newlines
+#
+# Output CSV:
+# - Filename: vpcs_endpoints.csv
+# - Location: ${exports_folder}
 #------------------------------------------------------------------------------#
 
 function report_vpcs_endpoints () {
@@ -1541,7 +1790,6 @@ function report_vpcs_endpoints () {
     local output_file="${exports_folder}/vpcs_endpoints.csv";
     : > "${output_file}";
 
-    ## Define the CSV headers as an array
     local headers=(
       VPC
       VpcEndpointId
@@ -1577,52 +1825,54 @@ function report_vpcs_endpoints () {
       fi;
 
       jq -r --arg vpc "${vpc_folder}" '
-          .VpcEndpoints[]? as $ep |
-          [
-              $vpc,
-              ($ep.VpcEndpointId // "-"),
-              ($ep.VpcEndpointType // "-"),
-              ($ep.VpcId // "-"),
-              ($ep.ServiceName // "-"),
-              ($ep.ServiceRegion // "-"),
-              ($ep.State // "-"),
-              ($ep.PrivateDnsEnabled | tostring // "-"),
-              ($ep.RequesterManaged | tostring // "-"),
-              ($ep.IpAddressType // "-"),
-              ($ep.CreationTimestamp // "-"),
-              (
-                  ($ep.RouteTableIds // [])
-                  | join(",")
-              ),
-              (
-                  ($ep.SubnetIds // [])
-                  | join(",")
-              ),
-              (
-                  ($ep.NetworkInterfaceIds // [])
-                  | join(",")
-              ),
-              (
-                  ($ep.Groups // [])
-                  | map("\(.GroupId)=\(.GroupName)")
-                  | join(";")
-              ),
-              (
-                  ($ep.DnsEntries // [])
-                  | map("\(.DnsName)=\(.HostedZoneId)")
-                  | join(";")
-              ),
-              (
-                  ($ep.Tags // [])
-                  | map("\(.Key)=\(.Value)")
-                  | join(";")
-              )
-          ] | @csv
+        .VpcEndpoints[]? as $ep |
+        [
+          $vpc,
+          ($ep.VpcEndpointId // "-"),
+          ($ep.VpcEndpointType // "-"),
+          ($ep.VpcId // "-"),
+          ($ep.ServiceName // "-"),
+          ($ep.ServiceRegion // "-"),
+          ($ep.State // "-"),
+          ($ep.PrivateDnsEnabled | tostring // "-"),
+          ($ep.RequesterManaged | tostring // "-"),
+          ($ep.IpAddressType // "-"),
+          ($ep.CreationTimestamp // "-"),
+          (
+            ($ep.RouteTableIds // [])
+            | join(",")
+          ),
+          (
+            ($ep.SubnetIds // [])
+            | join(",")
+          ),
+          (
+            ($ep.NetworkInterfaceIds // [])
+            | join(",")
+          ),
+          (
+            ($ep.Groups // [])
+            | map("\(.GroupId)=\(.GroupName)")
+            | join(";")
+          ),
+          (
+            ($ep.DnsEntries // [])
+            | map("\(.DnsName)=\(.HostedZoneId)")
+            | join(";")
+          ),
+          (
+            ( $ep.Tags // [] )
+            | map( "\(.Key)=\(.Value)" )
+            | join( "\n" )
+          )
+        ] | @csv
       ' "${target_file}" | tee -a "${output_file}";
     done;
 
     return 0;
 }; alias report-vpcs-endpoints='report_vpcs_endpoints';
+
+#------------------------------------------------------------------------------#
 
 report_interfaces_ec2_instances; echo -e;
 report_interfaces_nat_gateways; echo -e;
@@ -1630,8 +1880,8 @@ report_interfaces_transit_gateway_attachments; echo -e;
 report_interfaces_vpc_endpoints; echo -e;
 report_subnets_default_route_tables; echo -e;
 report_subnets_ec2_instances; echo -e;
-report_subnets_subnet_route_tables; echo -e;
 report_subnets_metadata; echo -e;
+report_subnets_subnet_route_tables; echo -e;
 report_vpcs_dhcp_options; echo -e;
 report_vpcs_ec2_instances; echo -e;
 report_vpcs_endpoints; echo -e;

@@ -1,4 +1,7 @@
 VPC,TransitGatewayAttachmentId,TransitGatewayId,TransitGatewayOwnerId,ResourceOwnerId,ResourceType,ResourceId,State,AssociatedRouteTableId,AssociationState,CreationTime,Tags
-"devops-locked-vpc","tgw-attach-0a3e2ed35a7e0b36b","tgw-001bc8550c79f14b9","***","***","vpc","vpc-0f7fa8fdff02da590","available","tgw-rtb-0d450d799e35a6419","associated","2025-07-09T04:12:45+00:00","DevOps=true;Name=DevOps-TGWAttachment-DevOps"
-"devops-private-vpc","tgw-attach-09fef679a102279f2","tgw-001bc8550c79f14b9","***","***","vpc","vpc-0dd98b0cb5d3ded56","available","tgw-rtb-0d450d799e35a6419","associated","2025-07-09T04:12:52+00:00","DevOps=true;Name=DevOps-TGWAttachment-Private"
-"devops-public-vpc","tgw-attach-0189b5caa6e869108","tgw-001bc8550c79f14b9","***","***","vpc","vpc-028b2dc2728406fd9","available","tgw-rtb-0d450d799e35a6419","associated","2025-07-09T04:12:45+00:00","DevOps=true;Name=DevOps-TGWAttachment-Public"
+"devops-locked-vpc","tgw-attach-0a3e2ed35a7e0b36b","tgw-001bc8550c79f14b9","***","***","vpc","vpc-0f7fa8fdff02da590","available","tgw-rtb-0d450d799e35a6419","associated","2025-07-09T04:12:45+00:00","DevOps=true
+Name=DevOps-TGWAttachment-DevOps"
+"devops-private-vpc","tgw-attach-09fef679a102279f2","tgw-001bc8550c79f14b9","***","***","vpc","vpc-0dd98b0cb5d3ded56","available","tgw-rtb-0d450d799e35a6419","associated","2025-07-09T04:12:52+00:00","DevOps=true
+Name=DevOps-TGWAttachment-Private"
+"devops-public-vpc","tgw-attach-0189b5caa6e869108","tgw-001bc8550c79f14b9","***","***","vpc","vpc-028b2dc2728406fd9","available","tgw-rtb-0d450d799e35a6419","associated","2025-07-09T04:12:45+00:00","DevOps=true
+Name=DevOps-TGWAttachment-Public"

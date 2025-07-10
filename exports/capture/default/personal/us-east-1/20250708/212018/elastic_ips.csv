@@ -1,3 +1,3 @@
-PublicIp,AllocationId,AssociatedInstance,AssociatedNetworkInterface
-"13.223.16.32","eipalloc-0c3250d6084eef8be","-","eni-097f65912e6e582e8"
-"3.213.170.119","eipalloc-035ebc52f1c086eb0","i-0e64cbd9718ff9743","eni-03fd376cea628ecb2"
+PublicIp,AllocationId,AssociatedInstance,AssociatedNetworkInterface,Tags
+"13.223.16.32","eipalloc-0c3250d6084eef8be","-","eni-097f65912e6e582e8",""
+"3.213.170.119","eipalloc-035ebc52f1c086eb0","i-0e64cbd9718ff9743","eni-03fd376cea628ecb2",""
